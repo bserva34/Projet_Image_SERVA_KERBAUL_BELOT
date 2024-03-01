@@ -19,3 +19,22 @@ Chaque application a des exigences particulières en termes de critères de qual
 8. Défis Actuels et Futures Directions
 Les défis actuels incluent la gestion des images haute résolution, la robustesse face aux variations climatiques, et l'adaptation à des environnements dynamiques.
 Les futures directions pourraient inclure l'intégration de la réalité augmentée et le développement de techniques résilientes à l'égard des changements environnementaux.
+
+Mosaïque basée sur le contenu :
+
+    Utilise des algorithmes de reconnaissance d'objet ou de caractéristiques pour analyser le contenu de l'image source.
+    Sélectionne des tuiles d'images qui ont des caractéristiques similaires.
+
+Mosaïque basée sur la fréquence spatiale :
+
+    Analyse la distribution des fréquences spatiales dans l'image source.
+    Sélectionne des tuiles d'images dont les caractéristiques de fréquence spatiale correspondent.
+
+Mosaïque basée sur les caractéristiques structurelles :
+
+    Analyse la structure globale de l'image source.
+    Sélectionne des tuiles d'images qui présentent des caractéristiques structurelles similaires.
+
+Mosaïque basée sur l'apprentissage automatique :
+
+    Utilise des modèles d'apprentissage automatique, tels que les réseaux neuronaux, pour apprendre les correspondances entre les régions de l'image source et les tuiles d'image
