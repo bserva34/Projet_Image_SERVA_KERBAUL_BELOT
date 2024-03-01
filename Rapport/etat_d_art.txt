@@ -1,6 +1,24 @@
 Introduction :
 La mosaïque d'images, un processus crucial dans divers domaines tels que la photographie, la cartographie, et la réalité virtuelle, implique la fusion de multiples images en une seule entité cohérente. Fondée sur des principes de base tels que l'alignement géométrique, la correction de l'exposition, et la gestion des transitions entre les images adjacentes, la mosaïque d'images fait face à des défis classiques tels que la variation des conditions d'éclairage, les changements de perspectives, et la présence d'objets mobiles.
 
+Domaine d'utilisation :
+    Photographie et Souvenirs : Les images mosaïques peuvent être utilisées pour créer des souvenirs visuels uniques en combinant plusieurs photos pour former une seule image. Cela peut être utilisé pour commémorer des événements spéciaux ou des périodes de la vie.
+    
+    Visualisation de Données : Dans le domaine de l'informatique graphique et de la visualisation de données, les mosaïques d'images peuvent être employées pour représenter des ensembles de données complexes de manière visuelle. Chaque tuile peut représenter une catégorie ou une variable, offrant une représentation visuelle rapide.
+    
+    Marketing et Publicité : Les entreprises utilisent parfois des images mosaïques dans leurs campagnes publicitaires ou leurs documents marketing. Cela peut être fait pour représenter la diversité, l'inclusion ou pour créer un impact visuel distinctif.
+    
+    Protection des Données : Dans le domaine de la confidentialité des données, les images mosaïques peuvent être utilisées pour masquer des parties sensibles d'une image tout en conservant une apparence visuelle générale. Cela est souvent utilisé dans le domaine médical ou lors de la publication d'images pour protéger l'identité des individus.
+    
+    Décoration et Conception : Les images mosaïques sont parfois utilisées comme éléments décoratifs dans la conception d'intérieur ou d'extérieur. Des tuiles d'images peuvent être assemblées pour former des motifs visuellement attrayants.
+    
+    Reconnaissance d'Objets : Dans le domaine de la vision par ordinateur, les images mosaïques peuvent être utilisées comme des ensembles d'entraînement pour les algorithmes de reconnaissance d'objets. Chaque tuile peut représenter une classe ou une catégorie spécifique d'objets.
+    
+    Éducation et Sensibilisation : Les images mosaïques peuvent être utilisées à des fins éducatives pour illustrer des concepts, des histoires ou des événements de manière visuelle et engageante.
+    
+    Projets Collaboratifs : La création d'une image mosaïque peut être un projet collaboratif, où différentes personnes contribuent avec des images, créant ainsi une œuvre collective qui reflète la diversité des participants
+
+
 Méthode de Base :
 Une approche élémentaire pour la mosaïque d'images consiste à découper l'image en zones de la taille des imagettes. Pour chaque zone, la couleur moyenne de chaque pixel est calculée,
 et dans la collection d'imagettes, la moyenne la plus proche est recherchée.
