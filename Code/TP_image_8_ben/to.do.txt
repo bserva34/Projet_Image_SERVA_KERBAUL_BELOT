@@ -1,7 +1,0 @@
-redimension_image.sh en mettant dans le fichier la taille des image que l'on veut
-creation_liste.sh qui va nous créer la liste de nom de toutes les images -> liste_nom.txt
-moyenne_imagette.cpp qui va nous créer une nouvelle liste : name/moyenne  ->liste_resultat.txt
-
-s'assurer d'avoir une image carré tel que nH/nH_imagette et nW/nW_imagette
-spécifié la taille des imagette dans le code
-carte_moyenne.cpp avec en entrée notre image.pgm et en sortie mosaique.pgm

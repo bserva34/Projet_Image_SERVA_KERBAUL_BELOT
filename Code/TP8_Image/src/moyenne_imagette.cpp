@@ -1,17 +1,27 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
-#include "../../image_ppm.h"
+#include "../include/image_ppm.h"
 
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    char cNomImgLue[250], cNomImgEcrite[250];
+
+    char nomListeNom[250], nomListeResultat[250];
     int nH, nW, nTaille, S1;
+
+    if (argc != 3) 
+	{
+		printf("Usage: ListeNom ListeRésultat \n"); 
+		return 1;
+	}
+
+	sscanf (argv[1],"%s",nomListeNom) ;
+	sscanf (argv[2],"%s",nomListeResultat) ;
 
     OCTET *ImgIn, *ImgOut;
 
-    std::string liste_nom = "liste_nom.txt";
+    std::string liste_nom = nomListeNom;
     std::fstream fichier_entree(liste_nom, std::ios::in);
     
     if (!fichier_entree.is_open()) {
@@ -19,7 +29,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string liste_sortie = "liste_resultat.txt";
+    std::string liste_sortie = nomListeResultat;
+
     std::ofstream fichier_sortie(liste_sortie, std::ios::out);
 
     if (!fichier_sortie.is_open()) {
@@ -31,7 +42,7 @@ int main(int argc, char* argv[]) {
     while (std::getline(fichier_entree, ligne)) {
         char* acc = (char*)ligne.c_str();
         //char* acc2 = "../../../../Master_Imagine_local/collection_imagette/redimensionner/";
-        char* acc2 = "../../../../Master_local/projet_image/BOWS2OrigEp3/redimension/";
+        char* acc2 = "imagettesRedim/";
         
         char* res = new char[strlen(acc) + strlen(acc2) + 1];
         strcpy(res, acc2);
