@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-  int nbImagette = 1000; // Nombre d'imagette disponible, à adapter
+  int nbImagette = 10000; // Nombre d'imagette disponible, à adapter
 
 	sscanf (argv[1],"%s",cNomImgLue) ;
 	sscanf (argv[2],"%s",cNomImgBloc) ;
@@ -99,8 +99,8 @@ int main(int argc, char* argv[])
         //}       
       }
       
-      //char* acc2 = "../../../../Master_Imagine_local/collection_imagette/redimensionner/";
-      char* acc2 = "imagettesRedim/";
+      char* acc2 = "../../../Master_Imagine_local/collection_imagette/redimensionner/";
+      //char* acc2 = "imagettesRedim/";
       char* res = new char[strlen(acc) + strlen(acc2) + 1];
       strcpy(res, acc2);
       strcat(res, acc);
