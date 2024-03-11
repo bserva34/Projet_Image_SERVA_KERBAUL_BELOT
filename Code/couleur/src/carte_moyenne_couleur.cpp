@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
         //}       
       }
       
-      char* acc2 = "../../../../Master_Imagine_local/collection_imagette/couleur_10000/";
+      char* acc2 = "../../../../Master_Imagine_local/collection_imagette/couleur_1/";
       //char* acc2 = "imagettesRedim/";
       char* res = new char[strlen(acc) + strlen(acc2) + 1];
       strcpy(res, acc2);

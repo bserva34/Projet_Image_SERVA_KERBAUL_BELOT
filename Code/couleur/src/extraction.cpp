@@ -52,12 +52,13 @@ void creer_images_pgm(const string& nomFichierBinaire, const string& nomFichierM
         vector<OCTET> donneesPixel(tailleImage);
         copy(donneesBinaires.begin() + i * 3073 + 1, donneesBinaires.begin() + (i + 1) * 3073, donneesPixel.begin());
 
+        
         OCTET * Imgacc;
         allocation_tableau(Imgacc, OCTET,1024*3);
         for(int j=0;j<1024;j++){
             Imgacc[j*3]=donneesPixel[j];
             Imgacc[j*3+1]=donneesPixel[j+1024];
-            Imgacc[j*3+1]=donneesPixel[j+2048];
+            Imgacc[j*3+2]=donneesPixel[j+2048];
         }
 
         // Créer un fichier image PPM
@@ -69,8 +70,8 @@ void creer_images_pgm(const string& nomFichierBinaire, const string& nomFichierM
         /*
         ecrire_image_pgm(((char*)(repertoireSortie + "/image_" + to_string(i) + "_rouge.pgm").c_str()), &donneesPixel[0], 32, 32);
         ecrire_image_pgm(((char*)(repertoireSortie + "/image_" + to_string(i) + "_vert.pgm").c_str()), &donneesPixel[1024], 32, 32);
-        ecrire_image_pgm(((char*)(repertoireSortie + "/image_" + to_string(i) + "_bleu.pgm").c_str()), &donneesPixel[2048], 32, 32);*/
-        
+        ecrire_image_pgm(((char*)(repertoireSortie + "/image_" + to_string(i) + "_bleu.pgm").c_str()), &donneesPixel[2048], 32, 32);
+        */
     }
 }
 
@@ -78,7 +79,7 @@ void creer_images_pgm(const string& nomFichierBinaire, const string& nomFichierM
 
 int main() {
     // Spécifiez le chemin du répertoire où vous souhaitez enregistrer les images
-    string repertoireSortie = "../../../../Master_Imagine_local/collection_imagette/couleur_10000/";
+    string repertoireSortie = "../../../../Master_Imagine_local/collection_imagette/couleur_1/";
 
     // Spécifiez le nom du fichier binaire et du fichier meta
     string nomFichierBinaire = "../../../../Master_Imagine_local/collection_imagette/cifar-10-batches-bin/data_batch_1.bin"; // Mettez à jour avec votre nom de fichier réel
