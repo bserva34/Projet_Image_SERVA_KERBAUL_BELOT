@@ -1,0 +1,1 @@
+Pour tester notre interface graphique, il faut que le répertoire cible soit déjà existant (puisqu'il faut sélectionner un répertoire dans l'explorateur de fichier)
