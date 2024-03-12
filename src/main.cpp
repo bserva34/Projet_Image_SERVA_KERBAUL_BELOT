@@ -17,7 +17,11 @@ typedef struct {
 
 CallbackData callbackData1;
 CallbackData callbackData2;
+CallbackData callbackData3;
+CallbackData callbackData4;
+CallbackData callbackData5;
 GtkWidget *entry3;
+GtkWidget *entry5;
 
 void makeSelectDirectory(GtkWidget *button, gpointer data) {
 
@@ -52,20 +56,43 @@ void makeSelectDirectory(GtkWidget *button, gpointer data) {
 }
 
 void redimensionImagettes(GtkWidget *button, gpointer data) {
-    std::vector<char*> *vectorParameter = ( std::vector<char*>*)data;
+    CallbackData *callbackData = (CallbackData*)data;
 
     // g_strdup permet de convertir l'entrée saisie en char*
     int tailleRedimension = atoi(g_strdup(gtk_entry_get_text(GTK_ENTRY(entry3)))); // atoi() renvoie 0 si la conversion est impossible
     if (callbackData1.directoryPath != NULL && callbackData2.directoryPath != NULL && tailleRedimension != 0){
-        std::cout << "Début du redimensionnement des imagettes\n";
 
         char command[700];
         sprintf(command, "./bash/redimension_image.sh %s %s %d",callbackData1.directoryPath,callbackData2.directoryPath,tailleRedimension);
         system(command); // Exécute la commande
 
-        std::cout << "Toutes les imagettes ont été redimensionné\n";
+        char newLabel[300];
+        sprintf(newLabel, "Les imagettes ont été redimensionné en %dx%d", tailleRedimension, tailleRedimension);
+        gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
     }else{
-        std::cout << "Les paramètres ne sont pas bon\n";
+        char newLabel[300];
+        sprintf(newLabel, "Impossible de redimensionner, vérifier les informations saisies");
+        gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
+    }
+}
+
+void listeImagettes(GtkWidget *button, gpointer data) {
+    CallbackData *callbackData = (CallbackData*)data;
+
+    char* fileNameOut = g_strdup(gtk_entry_get_text(GTK_ENTRY(entry5)));
+    if (callbackData4.directoryPath != NULL && fileNameOut[0] != '\0'){
+
+        char command[700];
+        sprintf(command, "./bash/creation_liste_nom.sh %s ./bash/%s",callbackData4.directoryPath, fileNameOut);
+        system(command); // Exécute la commande
+
+        char newLabel[300];
+        sprintf(newLabel, "Les imagettes ont été listé dans %s", fileNameOut);
+        gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
+    }else{
+        char newLabel[300];
+        sprintf(newLabel, "Impossible de lister, vérifier les informations saisies");
+        gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
     }
 }
 
@@ -128,6 +155,42 @@ int main(int argc, char **argv){
     gtk_widget_override_color(label2, GTK_STATE_FLAG_NORMAL, &textColor);
     gtk_fixed_put(GTK_FIXED(fixed), label2, 50, 170);
 
+    entry3 = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry3), "Entrez la nouvelle taille des imagettes");
+    gtk_entry_set_width_chars(GTK_ENTRY(entry3), 35);
+    gtk_fixed_put(GTK_FIXED(fixed), entry3, 50, 200);
+    GtkWidget *button3 = gtk_button_new_with_label("Redimensionner les imagettes");
+    gtk_fixed_put(GTK_FIXED(fixed), button3, 400, 200);
+    GtkWidget *label3 = gtk_label_new("");
+    gtk_widget_override_color(label3, GTK_STATE_FLAG_NORMAL, &textColor);
+    gtk_fixed_put(GTK_FIXED(fixed), label3, 50, 230);
+
+
+
+
+    GtkWidget *labelStep2 = gtk_label_new("Etape 2 : Lister les imagettes dans un fichier texte");
+    gtk_widget_override_color(labelStep2, GTK_STATE_FLAG_NORMAL, &textColor);
+    gtk_fixed_put(GTK_FIXED(fixed), labelStep2, 50, 260);
+
+    GtkWidget *button4 = gtk_button_new_with_label("Choisir le répertoire des imagettes à lister");
+    gtk_fixed_put(GTK_FIXED(fixed), button4, 50, 290);
+    GtkWidget *label4 = gtk_label_new("Pas de répertoire sélectionné");
+    gtk_widget_override_color(label4, GTK_STATE_FLAG_NORMAL, &textColor);
+    gtk_fixed_put(GTK_FIXED(fixed), label4, 50, 320);
+    entry5 = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry5), "Entrez le nom du fichier qui va lister les imagettes");
+    gtk_entry_set_width_chars(GTK_ENTRY(entry5), 35);
+    gtk_fixed_put(GTK_FIXED(fixed), entry5, 50, 350);
+    GtkWidget *button5 = gtk_button_new_with_label("Lister les imagettes");
+    gtk_fixed_put(GTK_FIXED(fixed), button5, 400, 350);
+    GtkWidget *label5 = gtk_label_new("");
+    gtk_widget_override_color(label5, GTK_STATE_FLAG_NORMAL, &textColor);
+    gtk_fixed_put(GTK_FIXED(fixed), label5, 50, 380);
+
+
+
+
+
     // Pour l'instant j'ai pas mieux que de créer un CallbackData différent pour chaque bouton (on pourait à la place utiliser un vector déclaré globalement, et donner juste un indice en paramètre des callback)
     callbackData1.window = window;
     callbackData1.directoryPath = NULL;
@@ -137,18 +200,24 @@ int main(int argc, char **argv){
     callbackData2.directoryPath = NULL;
     callbackData2.label = label2;
 
-    entry3 = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry3), "Entrez la nouvelle taille des imagettes");
-    gtk_entry_set_width_chars(GTK_ENTRY(entry3), 35);
-    gtk_fixed_put(GTK_FIXED(fixed), entry3, 50, 200);
+    callbackData3.window = window;
+    callbackData3.directoryPath = NULL;
+    callbackData3.label = label3;
 
-    GtkWidget *button3 = gtk_button_new_with_label("Redimensionner les imagettes");
-    gtk_fixed_put(GTK_FIXED(fixed), button3, 400, 200);
+    callbackData4.window = window;
+    callbackData4.directoryPath = NULL;
+    callbackData4.label = label4;
+
+    callbackData5.window = window;
+    callbackData5.directoryPath = NULL;
+    callbackData5.label = label5;
 
     // Connecter le signal "clicked" des bouton aux callbacks
     g_signal_connect(button1, "clicked", G_CALLBACK(makeSelectDirectory), &callbackData1);
     g_signal_connect(button2, "clicked", G_CALLBACK(makeSelectDirectory), &callbackData2);
-    g_signal_connect(button3, "clicked", G_CALLBACK(redimensionImagettes), NULL);
+    g_signal_connect(button3, "clicked", G_CALLBACK(redimensionImagettes), &callbackData3);
+    g_signal_connect(button4, "clicked", G_CALLBACK(makeSelectDirectory), &callbackData4);
+    g_signal_connect(button5, "clicked", G_CALLBACK(listeImagettes), &callbackData5);
     // -----------------------------------------------------------------------------------------
 
     gtk_widget_show_all(window);
