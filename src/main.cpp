@@ -222,6 +222,9 @@ int main(int argc, char **argv){
     grid = gtk_grid_new();
     gtk_container_add(GTK_CONTAINER(window), grid);
 
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 15);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 5);
+
     // Définition des éléments de la fenêtre ---------------------------------------------------
 
     GtkWidget *labelStep1 = gtk_label_new("Etape 1 : Redimmensionner les imagettes si nécessaire");
