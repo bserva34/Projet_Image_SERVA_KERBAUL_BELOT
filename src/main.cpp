@@ -10,7 +10,7 @@
 
 // On ne peut passer qu'un seul paramètre dans une fonction de callback
 typedef struct {
-    char* directoryPath;
+    char* directoryPath; // J'ai laissé directoryPath, mais on utilise aussi cette structure pour la sélection de fichier
     GtkWidget *window;
     GtkWidget *label; // On associe chaque bouton à un label
 } CallbackData;
@@ -20,8 +20,15 @@ CallbackData callbackData2;
 CallbackData callbackData3;
 CallbackData callbackData4;
 CallbackData callbackData5;
+CallbackData callbackData6;
+CallbackData callbackData7;
+CallbackData callbackData8;
+CallbackData callbackData9;
 GtkWidget *entry3;
 GtkWidget *entry5;
+GtkWidget *entry6;
+GtkWidget *entry7;
+GtkWidget *entry8;
 
 void makeSelectDirectory(GtkWidget *button, gpointer data) {
 
@@ -49,6 +56,38 @@ void makeSelectDirectory(GtkWidget *button, gpointer data) {
             g_free(dp);
         } else {
             g_print("Erreur : Impossible de récupérer le chemin du répertoire sélectionné.\n");
+        }
+    }
+
+    gtk_widget_destroy(dialog);
+}
+
+void makeSelectFile(GtkWidget *button, gpointer data) {
+
+    CallbackData *callbackData = (CallbackData*)data;
+
+    GtkWidget *dialog = gtk_file_chooser_dialog_new("Sélectionner un fichier",
+                                                    GTK_WINDOW(data),
+                                                    GTK_FILE_CHOOSER_ACTION_OPEN,
+                                                    "Annuler", GTK_RESPONSE_CANCEL,
+                                                    "Sélectionner", GTK_RESPONSE_ACCEPT,
+                                                    NULL);
+
+    gint result = gtk_dialog_run(GTK_DIALOG(dialog));
+    
+    if (result == GTK_RESPONSE_ACCEPT) {
+        char *fp = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        if (fp != NULL) {
+            if (callbackData->directoryPath != NULL) {
+                g_free(callbackData->directoryPath);
+            }
+            callbackData->directoryPath = g_strdup(fp);
+            char newLabel[300];
+            sprintf(newLabel, "Le fichier sélectionné est : %s", fp);
+            gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
+            g_free(fp);
+        } else {
+            g_print("Erreur : Impossible de récupérer le chemin du fichier sélectionné.\n");
         }
     }
 
@@ -83,11 +122,18 @@ void listeImagettes(GtkWidget *button, gpointer data) {
     if (callbackData4.directoryPath != NULL && fileNameOut[0] != '\0'){
 
         char command[700];
-        sprintf(command, "./bash/creation_liste_nom.sh %s ./bash/%s",callbackData4.directoryPath, fileNameOut);
-        system(command); // Exécute la commande
+        // Créer la liste du nom de toutes les imagettes
+        sprintf(command, "./bash/creation_liste_nom.sh %s ./bash/%s.txt",callbackData4.directoryPath, fileNameOut);
+        system(command); 
+
+        // Créer la liste contenant les moyennes de toutes les imagettes
+        sprintf(command, "make compileMoyenne");
+        system(command); 
+        sprintf(command, "./moyenne bash/%s.txt bash/%s_moyennes.txt %s/",fileNameOut,fileNameOut,callbackData4.directoryPath);
+        system(command); 
 
         char newLabel[300];
-        sprintf(newLabel, "Les imagettes ont été listé dans %s", fileNameOut);
+        sprintf(newLabel, "Les imagettes ont été listé dans %s_moyennes.txt", fileNameOut);
         gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
     }else{
         char newLabel[300];
@@ -95,6 +141,36 @@ void listeImagettes(GtkWidget *button, gpointer data) {
         gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
     }
 }
+
+void makeMosaique(GtkWidget *button, gpointer data) {
+
+    CallbackData *callbackData = (CallbackData*)data;
+
+    
+    int nbImagette = atoi(g_strdup(gtk_entry_get_text(GTK_ENTRY(entry6))));
+    int tailleImagette = atoi(g_strdup(gtk_entry_get_text(GTK_ENTRY(entry7))));
+    char* fileNameOut = g_strdup(gtk_entry_get_text(GTK_ENTRY(entry8)));
+    
+    if (nbImagette != 0 && tailleImagette != 0 && fileNameOut[0] != '\0' && callbackData6.directoryPath != NULL && callbackData7.directoryPath != NULL && callbackData8.directoryPath != NULL){
+        char command[700];
+
+        sprintf(command, "make compileCarteMoyenne");
+        system(command); 
+
+        sprintf(command, "./carteMoyenne %s dataImg/%s.pgm %s %d %d %s/", callbackData6.directoryPath,fileNameOut,callbackData7.directoryPath,tailleImagette,nbImagette,callbackData8.directoryPath);
+        system(command); 
+
+        
+        char newLabel[300];
+        sprintf(newLabel, "L'image mosaïque a été créée dans %s.pgm", fileNameOut);
+        gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
+    }else{
+        char newLabel[300];
+        sprintf(newLabel, "Impossible de créer la mosaïque, vérifier les informations saisies");
+        gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
+    }
+}
+
 
 /*
 void printDirectory(GtkWidget *button, gpointer data) {
@@ -190,6 +266,44 @@ int main(int argc, char **argv){
 
 
 
+    GtkWidget *labelStep3 = gtk_label_new("Etape 3 : Créer l'image mosaïque");
+    gtk_widget_override_color(labelStep3, GTK_STATE_FLAG_NORMAL, &textColor);
+    gtk_fixed_put(GTK_FIXED(fixed), labelStep3, 50, 410);
+    entry6 = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry6), "Nombre d'imagettes");
+    gtk_entry_set_width_chars(GTK_ENTRY(entry6), 22);
+    gtk_fixed_put(GTK_FIXED(fixed), entry6, 50, 440);
+    entry7 = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry7), "Tailles des imagettes");
+    gtk_entry_set_width_chars(GTK_ENTRY(entry7), 22);
+    gtk_fixed_put(GTK_FIXED(fixed), entry7, 250, 440);
+    GtkWidget *button6 = gtk_button_new_with_label("Choisir image initiale");
+    gtk_fixed_put(GTK_FIXED(fixed), button6, 50, 480);
+    GtkWidget *label6 = gtk_label_new("Aucune image choisie");
+    gtk_widget_override_color(label6, GTK_STATE_FLAG_NORMAL, &textColor);
+    gtk_fixed_put(GTK_FIXED(fixed), label6, 50, 510);
+    entry8 = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry8), "Nom image mosaïque");
+    gtk_entry_set_width_chars(GTK_ENTRY(entry8), 22);
+    gtk_fixed_put(GTK_FIXED(fixed), entry8, 250, 480);
+    GtkWidget *button7 = gtk_button_new_with_label("Fichier moyennes imagettes");
+    gtk_fixed_put(GTK_FIXED(fixed), button7, 50, 540);
+    GtkWidget *label7 = gtk_label_new("Aucune fichier choisie");
+    gtk_widget_override_color(label7, GTK_STATE_FLAG_NORMAL, &textColor);
+    gtk_fixed_put(GTK_FIXED(fixed), label7, 50, 570);
+    GtkWidget *button8 = gtk_button_new_with_label("Choisir le répertoire des imagettes");
+    gtk_fixed_put(GTK_FIXED(fixed), button8, 50, 600);
+    GtkWidget *label8 = gtk_label_new("Aucune répertoire choisie");
+    gtk_widget_override_color(label8, GTK_STATE_FLAG_NORMAL, &textColor);
+    gtk_fixed_put(GTK_FIXED(fixed), label8, 50, 630);
+
+    GtkWidget *button9 = gtk_button_new_with_label("Créer l'image mosaïque");
+    gtk_fixed_put(GTK_FIXED(fixed), button9, 225, 700);
+    GtkWidget *label9 = gtk_label_new("");
+    gtk_widget_override_color(label9, GTK_STATE_FLAG_NORMAL, &textColor);
+    gtk_fixed_put(GTK_FIXED(fixed), label9, 225, 730);
+
+
 
     // Pour l'instant j'ai pas mieux que de créer un CallbackData différent pour chaque bouton (on pourait à la place utiliser un vector déclaré globalement, et donner juste un indice en paramètre des callback)
     callbackData1.window = window;
@@ -212,12 +326,33 @@ int main(int argc, char **argv){
     callbackData5.directoryPath = NULL;
     callbackData5.label = label5;
 
+    callbackData6.window = window;
+    callbackData6.directoryPath = NULL;
+    callbackData6.label = label6;
+
+    callbackData7.window = window;
+    callbackData7.directoryPath = NULL;
+    callbackData7.label = label7;
+
+    callbackData8.window = window;
+    callbackData8.directoryPath = NULL;
+    callbackData8.label = label8;
+
+    callbackData9.window = window;
+    callbackData9.directoryPath = NULL;
+    callbackData9.label = label9;
+
     // Connecter le signal "clicked" des bouton aux callbacks
     g_signal_connect(button1, "clicked", G_CALLBACK(makeSelectDirectory), &callbackData1);
     g_signal_connect(button2, "clicked", G_CALLBACK(makeSelectDirectory), &callbackData2);
     g_signal_connect(button3, "clicked", G_CALLBACK(redimensionImagettes), &callbackData3);
     g_signal_connect(button4, "clicked", G_CALLBACK(makeSelectDirectory), &callbackData4);
     g_signal_connect(button5, "clicked", G_CALLBACK(listeImagettes), &callbackData5);
+    g_signal_connect(button6, "clicked", G_CALLBACK(makeSelectFile), &callbackData6);
+    g_signal_connect(button7, "clicked", G_CALLBACK(makeSelectFile), &callbackData7);
+    g_signal_connect(button8, "clicked", G_CALLBACK(makeSelectDirectory), &callbackData8);
+    g_signal_connect(button9, "clicked", G_CALLBACK(makeMosaique), &callbackData9);
+
     // -----------------------------------------------------------------------------------------
 
     gtk_widget_show_all(window);

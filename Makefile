@@ -8,8 +8,15 @@ compile :
 run : 
 	./main
 
+compileMoyenne :
+	$(CPP) src/moyenne_imagette.cpp -o moyenne $(LIBS)
+
+compileCarteMoyenne :
+	$(CPP) src/carte_moyenne.cpp -o carteMoyenne $(LIBS)
+
 clean :
-	rm main
+	rm main moyenne carteMoyenne bash/*.txt 
+
 
 
 
