@@ -1,3 +1,21 @@
+#bID { /* Style pour les boutons, pour l'instant l'ID est appliqué manuellement aux boutons mais il faudrait trouver une meilleure manière */
+    border: 3px solid black;
+    border-radius: 5px;
+    padding: 5px 10px;
+    margin-left: 20px;
+    margin-top: 10px;
+    color: white;
+    background-image: image(white);
+}
+
+#bID:hover {
+	background-image: image(#9E9E9E);
+}
+
+#bID:active {
+	background-image: image(#757575);
+}
+
 label {
     color: black;
 }
@@ -10,17 +28,11 @@ window {
     background-color: white;
 }
 
-#bID { /* Style pour les boutons, pour l'instant l'ID est appliqué manuellement aux boutons mais il faudrait trouver une meilleure manière */
-    border: 3px solid black;
-    border-radius: 5px;
-    padding: 5px 10px;
-    margin-left: 20px;
-    margin-top: 10px;
-}
-
 entry {
     margin-left: 20px;
     margin-top: 10px;
+    background-image: image(white);
+    color:black;
 }
 
 grid {
