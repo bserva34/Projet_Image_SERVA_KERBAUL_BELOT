@@ -14,8 +14,16 @@ compileMoyenne :
 compileCarteMoyenne :
 	$(CPP) src/carte_moyenne.cpp -o carteMoyenne $(LIBS)
 
-clean :
-	rm main moyenne carteMoyenne bash/*.txt 
+cleanCompiled :
+	rm -f main moyenne carteMoyenne
+
+cleanImagettes :
+	rm -f bash/*.txt imagettesRedim/*.pgm
+
+cleanAll :
+	make cleanCompiled
+	make cleanImagettes
+
 
 
 

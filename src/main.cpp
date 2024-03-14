@@ -186,16 +186,11 @@ int main(int argc, char **argv){
     
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
-    GdkRGBA backgroundColor;
-    backgroundColor.red = 33;
-    backgroundColor.green = 33;
-    backgroundColor.blue = 33;
-
-    gtk_widget_override_background_color(window, GTK_STATE_FLAG_NORMAL, &backgroundColor);
-
-    // Tout les labels auront cette couleur
-    GdkRGBA textColor;
-    gdk_rgba_parse(&textColor, "white");
+    // On utilise du CSS pour la couleur de fond de la fenêtre et la couleur des labels
+    GtkCssProvider *provider = gtk_css_provider_new();
+    gtk_css_provider_load_from_path(provider, "style/styles.css", NULL);
+    gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    g_object_unref(provider);
 
     for (int i = 0 ; i < 9 ; i++){ // Les textes par défaut des labels sont différents (il y en a 3 possible)
         GtkWidget *label;
@@ -206,7 +201,6 @@ int main(int argc, char **argv){
         }else{
             label = gtk_label_new("Pas de répertoire sélectionné");
         }
-        gtk_widget_override_color(label, GTK_STATE_FLAG_NORMAL, &textColor);
         labels.push_back(label);
     }
 
@@ -228,7 +222,6 @@ int main(int argc, char **argv){
     // Définition des éléments de la fenêtre ---------------------------------------------------
 
     GtkWidget *labelStep1 = gtk_label_new("Etape 1 : Redimmensionner les imagettes si nécessaire");
-    gtk_widget_override_color(labelStep1, GTK_STATE_FLAG_NORMAL, &textColor);
     gtk_grid_attach(GTK_GRID(grid), labelStep1, 0, 0, 2, 1);
 
     GtkWidget *button1 = gtk_button_new_with_label("Choisir le répertoire initiale des imagettes");
@@ -249,7 +242,6 @@ int main(int argc, char **argv){
 
 
     GtkWidget *labelStep2 = gtk_label_new("Etape 2 : Lister les imagettes dans un fichier texte");
-    gtk_widget_override_color(labelStep2, GTK_STATE_FLAG_NORMAL, &textColor);
     gtk_grid_attach(GTK_GRID(grid), labelStep2, 0, 8, 2, 1);
 
     GtkWidget *button4 = gtk_button_new_with_label("Choisir le répertoire des imagettes à lister");
@@ -264,7 +256,6 @@ int main(int argc, char **argv){
     gtk_grid_attach(GTK_GRID(grid), labels[4], 0, 12, 2, 1);
 
     GtkWidget *labelStep3 = gtk_label_new("Etape 3 : Créer l'image mosaïque");
-    gtk_widget_override_color(labelStep3, GTK_STATE_FLAG_NORMAL, &textColor);
     gtk_grid_attach(GTK_GRID(grid), labelStep3, 0, 14, 2, 1);
     entry6 = gtk_entry_new();
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry6), "Nombre d'imagettes");

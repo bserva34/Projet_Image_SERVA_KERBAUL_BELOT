@@ -1,0 +1,26 @@
+label {
+    color: black;
+}
+
+window {
+    background-color: white;
+}
+
+button {
+    border: 3px solid black;
+    border-radius: 5px;
+    padding: 5px 10px;
+    margin-left: 20px;
+}
+
+entry {
+    margin-left: 20px;
+}
+
+grid {
+    margin-top: 40px;
+}
+
+image {
+    margin-left: 50px;
+}
