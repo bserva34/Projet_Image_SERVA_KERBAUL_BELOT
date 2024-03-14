@@ -168,7 +168,7 @@ void makeMosaique(GtkWidget *button, gpointer data) {
         sprintf(command, "dataImg/%s.png",fileNameOut);
         gtk_image_set_from_file(GTK_IMAGE(image), command);
 
-        gtk_grid_attach(GTK_GRID(grid), image, 2, 2, 1,35); // Attention : Pour pas que l'image déplace tout, il faut qu'elle occupe plus de ligne (4è paramètre) que tout le reste réuni
+        gtk_grid_attach(GTK_GRID(grid), image, 2, 0, 1,35); // Attention : Pour pas que l'image déplace tout, il faut qu'elle occupe plus de ligne (4è paramètre) que tout le reste réuni
         gtk_widget_show_all(grid);
     }else{
         char newLabel[300];
@@ -222,13 +222,16 @@ int main(int argc, char **argv){
     // Définition des éléments de la fenêtre ---------------------------------------------------
 
     GtkWidget *labelStep1 = gtk_label_new("Etape 1 : Redimmensionner les imagettes si nécessaire");
+    gtk_widget_set_name(labelStep1, "labelStep");
     gtk_grid_attach(GTK_GRID(grid), labelStep1, 0, 0, 2, 1);
 
     GtkWidget *button1 = gtk_button_new_with_label("Choisir le répertoire initiale des imagettes");
+    gtk_widget_set_name(button1, "bID");
     gtk_grid_attach(GTK_GRID(grid), button1, 0, 1, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), labels[0], 0, 2, 2, 1);
 
     GtkWidget *button2 = gtk_button_new_with_label("Choisir le répertoire des imagettes redimensionnées");
+    gtk_widget_set_name(button2, "bID");
     gtk_grid_attach(GTK_GRID(grid), button2, 0, 3, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), labels[1], 0, 4, 2, 1);
 
@@ -237,14 +240,17 @@ int main(int argc, char **argv){
     gtk_entry_set_width_chars(GTK_ENTRY(entry3), 35);
     gtk_grid_attach(GTK_GRID(grid), entry3, 0, 5, 1, 1);
     GtkWidget *button3 = gtk_button_new_with_label("Redimensionner les imagettes");
+    gtk_widget_set_name(button3, "bID");
     gtk_grid_attach(GTK_GRID(grid), button3, 1, 5, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), labels[2], 0, 6, 2, 1);
 
 
     GtkWidget *labelStep2 = gtk_label_new("Etape 2 : Lister les imagettes dans un fichier texte");
+    gtk_widget_set_name(labelStep2, "labelStep");
     gtk_grid_attach(GTK_GRID(grid), labelStep2, 0, 8, 2, 1);
 
     GtkWidget *button4 = gtk_button_new_with_label("Choisir le répertoire des imagettes à lister");
+    gtk_widget_set_name(button4, "bID");
     gtk_grid_attach(GTK_GRID(grid), button4, 0, 9, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), labels[3], 0, 10, 2, 1);
     entry5 = gtk_entry_new();
@@ -252,10 +258,12 @@ int main(int argc, char **argv){
     gtk_entry_set_width_chars(GTK_ENTRY(entry5), 35);
     gtk_grid_attach(GTK_GRID(grid), entry5, 0, 11, 1, 1);
     GtkWidget *button5 = gtk_button_new_with_label("Lister les imagettes");
+    gtk_widget_set_name(button5, "bID");
     gtk_grid_attach(GTK_GRID(grid), button5, 1, 11, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), labels[4], 0, 12, 2, 1);
 
     GtkWidget *labelStep3 = gtk_label_new("Etape 3 : Créer l'image mosaïque");
+    gtk_widget_set_name(labelStep3, "labelStep");
     gtk_grid_attach(GTK_GRID(grid), labelStep3, 0, 14, 2, 1);
     entry6 = gtk_entry_new();
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry6), "Nombre d'imagettes");
@@ -266,6 +274,7 @@ int main(int argc, char **argv){
     gtk_entry_set_width_chars(GTK_ENTRY(entry7), 22);
     gtk_grid_attach(GTK_GRID(grid), entry7, 1, 15, 1, 1);
     GtkWidget *button6 = gtk_button_new_with_label("Choisir image initiale");
+    gtk_widget_set_name(button6, "bID");
     gtk_grid_attach(GTK_GRID(grid), button6, 0, 16, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), labels[5], 0, 17, 2, 1);
     entry8 = gtk_entry_new();
@@ -273,13 +282,16 @@ int main(int argc, char **argv){
     gtk_entry_set_width_chars(GTK_ENTRY(entry8), 22);
     gtk_grid_attach(GTK_GRID(grid), entry8, 1, 16, 1, 1);
     GtkWidget *button7 = gtk_button_new_with_label("Fichier moyennes imagettes");
+    gtk_widget_set_name(button7, "bID");
     gtk_grid_attach(GTK_GRID(grid), button7, 0, 18, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), labels[6], 0, 19, 2, 1);
     GtkWidget *button8 = gtk_button_new_with_label("Choisir le répertoire des imagettes");
+    gtk_widget_set_name(button8, "bID");
     gtk_grid_attach(GTK_GRID(grid), button8, 0, 20, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), labels[7], 0, 21, 2, 1);
 
     GtkWidget *button9 = gtk_button_new_with_label("Créer l'image mosaïque");
+    gtk_widget_set_name(button9, "bID");
     gtk_grid_attach(GTK_GRID(grid), button9, 0, 23, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), labels[8], 0, 24, 2, 1);
 

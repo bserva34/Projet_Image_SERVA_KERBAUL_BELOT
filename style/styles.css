@@ -2,25 +2,32 @@ label {
     color: black;
 }
 
+#labelStep {
+    font-weight: bold;
+    margin-top: 30px;
+}
 window {
     background-color: white;
 }
 
-button {
+#bID { /* Style pour les boutons, pour l'instant l'ID est appliqué manuellement aux boutons mais il faudrait trouver une meilleure manière */
     border: 3px solid black;
     border-radius: 5px;
     padding: 5px 10px;
     margin-left: 20px;
+    margin-top: 10px;
 }
 
 entry {
     margin-left: 20px;
+    margin-top: 10px;
 }
 
 grid {
     margin-top: 40px;
+    margin-left: 20px;
 }
 
 image {
-    margin-left: 50px;
+    margin-left: 100px;
 }
