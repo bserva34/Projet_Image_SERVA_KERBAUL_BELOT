@@ -65,25 +65,25 @@ void makeSelectFile(GtkWidget *button, gpointer data) {
     CallbackData *callbackData = (CallbackData*)data;
 
     GtkWidget *dialog = gtk_file_chooser_dialog_new("Sélectionner un fichier",
-                                                    GTK_WINDOW(data),
-                                                    GTK_FILE_CHOOSER_ACTION_OPEN,
-                                                    "Annuler", GTK_RESPONSE_CANCEL,
-                                                    "Sélectionner", GTK_RESPONSE_ACCEPT,
-                                                    NULL);
+                                                     GTK_WINDOW(callbackData->window),
+                                                     GTK_FILE_CHOOSER_ACTION_OPEN,
+                                                     "Annuler", GTK_RESPONSE_CANCEL,
+                                                     "Sélectionner", GTK_RESPONSE_ACCEPT,
+                                                     NULL);
 
     gint result = gtk_dialog_run(GTK_DIALOG(dialog));
     
     if (result == GTK_RESPONSE_ACCEPT) {
-        char *fp = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-        if (fp != NULL) {
+        char *dp = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        if (dp != NULL) {
             if (callbackData->directoryPath != NULL) {
                 g_free(callbackData->directoryPath);
             }
-            callbackData->directoryPath = g_strdup(fp);
+            callbackData->directoryPath = g_strdup(dp);
             char newLabel[300];
-            sprintf(newLabel, "Le fichier sélectionné est : %s", fp);
+            sprintf(newLabel, "Le fichier sélectionné est : %s", dp);
             gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
-            g_free(fp);
+            g_free(dp);
         } else {
             g_print("Erreur : Impossible de récupérer le chemin du fichier sélectionné.\n");
         }
@@ -201,6 +201,7 @@ int main(int argc, char **argv){
         }else{
             label = gtk_label_new("Pas de répertoire sélectionné");
         }
+        gtk_widget_set_name(label, "labelSimple");
         labels.push_back(label);
     }
 
