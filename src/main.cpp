@@ -7,6 +7,24 @@
 #include <cstdlib> // Pour la fonction system() qui permet d'éxécuter des commandes
 
 #include <gtkmm.h>
+#include "../include/image_ppm.h"
+
+double getPSNR_NDG(OCTET *ImgIn, OCTET *ImgOut, int width, int height){ // Calcule le PSNR entre les 2 images niveau de gris
+	double somme = 0.;
+	for(int x = 0; x < height ; ++x){
+		for(int y = 0; y < width; y++)
+		{
+			int In1 = (int) ImgIn[x*width + y];
+			int In2 = (int) ImgOut[x*width + y];
+			somme += pow(In1 - In2,2);
+		}
+	}
+
+	double taille = width * height;
+	double EQM = somme / taille;
+	double PSNR = 10 * log10(pow(255,2)/EQM);
+	return PSNR;
+}
 
 // On ne peut passer qu'un seul paramètre dans une fonction de callback
 typedef struct {
@@ -25,6 +43,7 @@ GtkWidget *entry7;
 GtkWidget *entry8;
 
 GtkWidget* image;
+GtkWidget* labelPSNR; // Label sous l'image mosaïque qui donne le PSNR
 
 GtkWidget *grid;
 
@@ -168,8 +187,30 @@ void makeMosaique(GtkWidget *button, gpointer data) {
         sprintf(command, "dataImg/%s.png",fileNameOut);
         gtk_image_set_from_file(GTK_IMAGE(image), command);
 
-        gtk_grid_attach(GTK_GRID(grid), image, 2, 0, 1,35); // Attention : Pour pas que l'image déplace tout, il faut qu'elle occupe plus de ligne (4è paramètre) que tout le reste réuni
+        gtk_grid_attach(GTK_GRID(grid), image, 2, 1, 1,35); // Attention : Pour pas que l'image déplace tout, il faut qu'elle occupe plus de ligne (4è paramètre) que tout le reste réuni
+        // gtk_widget_show_all(grid);
+
+        // Calcul du PSNR
+        OCTET *ImgIn, *ImgOut;
+        int height, width;
+        lire_nb_lignes_colonnes_image_pgm(callbacks[5].directoryPath, &height, &width);
+        int tailleImg = height * width;
+        char cheminImgOut[200];
+        sprintf(cheminImgOut, "dataImg/%s.pgm",fileNameOut);
+        
+        
+        allocation_tableau(ImgIn, OCTET, tailleImg);
+        lire_image_pgm(callbacks[5].directoryPath, ImgIn, tailleImg);
+        allocation_tableau(ImgOut, OCTET, tailleImg);
+        lire_image_pgm(cheminImgOut, ImgOut, tailleImg);
+
+        double psnr = getPSNR_NDG(ImgIn,ImgOut,width,height);
+        char indicationPSNR[300];
+        sprintf(indicationPSNR, "PSNR entre l'image initiale et l'image mosaïque = %f dB", psnr);
+        gtk_label_set_text(GTK_LABEL(labelPSNR),indicationPSNR);
+        gtk_grid_attach(GTK_GRID(grid), labelPSNR, 2, 0, 2, 1);
         gtk_widget_show_all(grid);
+
     }else{
         char newLabel[300];
         sprintf(newLabel, "Impossible de créer la mosaïque, vérifier les informations saisies");
@@ -297,6 +338,8 @@ int main(int argc, char **argv){
     gtk_grid_attach(GTK_GRID(grid), labels[8], 0, 24, 2, 1);
 
     image = gtk_image_new();
+    labelPSNR = gtk_label_new("");
+    gtk_widget_set_name(labelPSNR, "labelSimple");
 
     // Connecter le signal "clicked" des bouton aux callbacks
     g_signal_connect(button1, "clicked", G_CALLBACK(makeSelectDirectory),&(callbacks[0]));
