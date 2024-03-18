@@ -79,10 +79,10 @@ void creer_images_pgm(const string& nomFichierBinaire, const string& nomFichierM
 
 int main() {
     // Spécifiez le chemin du répertoire où vous souhaitez enregistrer les images
-    string repertoireSortie = "../../../../Master_Imagine_local/collection_imagette/couleur_1/";
+    string repertoireSortie = "../../../../Master_Imagine_local/collection_imagette/couleur_5/";
 
     // Spécifiez le nom du fichier binaire et du fichier meta
-    string nomFichierBinaire = "../../../../Master_Imagine_local/collection_imagette/cifar-10-batches-bin/data_batch_1.bin"; // Mettez à jour avec votre nom de fichier réel
+    string nomFichierBinaire = "../../../../Master_Imagine_local/collection_imagette/cifar-10-batches-bin/data_batch_5.bin"; // Mettez à jour avec votre nom de fichier réel
     string nomFichierMeta = "../../../../Master_Imagine_local/collection_imagette/cifar-10-batches-bin/batches.meta.txt"; // Mettez à jour avec votre nom de fichier réel
 
     creer_images_pgm(nomFichierBinaire, nomFichierMeta, repertoireSortie);

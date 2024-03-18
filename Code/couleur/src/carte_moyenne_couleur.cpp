@@ -27,7 +27,8 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-  int nbImagette = 10000; // Nombre d'imagette disponible, à adapter
+  int nbImagette = 41129;
+  //int nbImagette = 10000; // Nombre d'imagette disponible, à adapter
   cout<<"nb img : "<<nbImagette<<endl;
 
 	sscanf (argv[1],"%s",cNomImgLue) ;
@@ -124,7 +125,7 @@ int main(int argc, char* argv[])
         //}       
       }
       
-      char* acc2 = "../../../../Master_Imagine_local/collection_imagette/couleur_1/";
+      char* acc2 = "../../../../Master_Imagine_local/collection_imagette/couleur/";
       //char* acc2 = "imagettesRedim/";
       char* res = new char[strlen(acc) + strlen(acc2) + 1];
       strcpy(res, acc2);

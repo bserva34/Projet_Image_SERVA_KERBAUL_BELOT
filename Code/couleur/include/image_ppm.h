@@ -222,3 +222,19 @@ void lire_image_pgm(char  nom_image[], OCTET *pt_image, int taille_image)
 }
 /*===========================================================================*/
 
+double psnr_color(OCTET *ImgIn,OCTET *ImgOut,int nH,int nW,int nTaille){
+	double eqmr=0.;
+	double eqmg=0.;
+	double eqmb=0.;
+	for(int i=0;i<nH;i++){
+  		for(int j=0;j<nW;j++){
+    		eqmr+=pow(ImgIn[(j*nW+i)*3]-ImgOut[(j*nW+i)*3],2);
+    		eqmg+=pow(ImgIn[(j*nW+i)*3+1]-ImgOut[(j*nW+i)*3+1],2);
+    		eqmb+=pow(ImgIn[(j*nW+i)*3+2]-ImgOut[(j*nW+i)*3+2],2);
+  		}
+	}
+	double eqm=(1./3.)*(eqmr/nTaille+eqmg/nTaille+eqmb/nTaille);
+	double psnr=10*log10(255.*255./eqm);
+
+	return psnr;
+}
