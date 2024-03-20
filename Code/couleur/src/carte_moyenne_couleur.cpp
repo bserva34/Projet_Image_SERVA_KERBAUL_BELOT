@@ -8,11 +8,12 @@
 
 using namespace std;
   
-bool deja_utiliser(std::vector<int> &used,int taille,int check){
-  for(int i=0;i<taille;i++){
-    if(used[i]==check){
-      return false;
-    }
+
+int nb_max_utilisation = 1;
+
+bool deja_utiliser(std::vector<int> &used,int check){
+  if(used[check]>=nb_max_utilisation){
+    return false;
   }
   return true;
 }
@@ -22,17 +23,17 @@ int main(int argc, char* argv[])
   int nH, nW, nTaille, S1;
   
   if (argc != 5) 
-	{
-		printf("Usage: ImageInitiale.ppm ImageBloc.ppm ImageMosaique.ppm ListeMoyenneImagettes \n"); 
-		return 1;
-	}
+  {
+    printf("Usage: ImageInitiale.ppm ImageBloc.ppm ImageMosaique.ppm ListeMoyenneImagettes \n"); 
+    return 1;
+  }
 
   int nbImagette = 41129;
   //int nbImagette = 10000; // Nombre d'imagette disponible, à adapter
   cout<<"nb img : "<<nbImagette<<endl;
 
-	sscanf (argv[1],"%s",cNomImgLue) ;
-	sscanf (argv[2],"%s",cNomImgBloc) ;
+  sscanf (argv[1],"%s",cNomImgLue) ;
+  sscanf (argv[2],"%s",cNomImgBloc) ;
   sscanf (argv[3],"%s",cNomImgMosaique) ;
   sscanf (argv[4],"%s",cNomListeMoyenne) ;
 
@@ -54,7 +55,9 @@ int main(int argc, char* argv[])
   double moy_r[nbImagette];
   double moy_g[nbImagette];
   double moy_b[nbImagette];
-  std::vector<int> used;
+  std::vector<int> used(nbImagette,0);
+  
+
 
   std::fstream fichier(cNomListeMoyenne, std::ios::in);
       
@@ -115,14 +118,14 @@ int main(int argc, char* argv[])
       char* acc = (char*)nom[0].c_str();;
       double stock=moy_r[0]+moy_g[0]+moy_b[0];
       for(int b=0;b<nbImagette;b++){
-        //if(deja_utiliser(used,used.size(),b)){
+        if(deja_utiliser(used,b)){
           int diff=abs(moyenne_r-moy_r[b])+abs(moyenne_g-moy_g[b])+abs(moyenne_b-moy_b[b]);
           if(diff<stock){
             stock=diff;
             acc=(char*)nom[b].c_str();
             indice=b;
           } 
-        //}       
+        }       
       }
       
       char* acc2 = "../../../../Master_Imagine_local/collection_imagette/couleur/";
@@ -146,10 +149,10 @@ int main(int argc, char* argv[])
 
       free(Imgacc);
       //cout<<i*nW+j<<endl;
-      //used.push_back(indice);
+      used[indice]++;
     }
   }    
-	
+  
   ecrire_image_ppm(cNomImgBloc,ImgOut,nb,nb);
   ecrire_image_ppm(cNomImgMosaique,ImgOut2,nH,nW);
   free(ImgIn); free(ImgOut);
