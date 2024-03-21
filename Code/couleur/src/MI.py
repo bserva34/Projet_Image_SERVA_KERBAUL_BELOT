@@ -30,20 +30,24 @@ def compute_mi(image1, image2):
     return mi
 
 # Charger les deux images que vous souhaitez comparer
-image1 = cv2.imread('../dataImg/squirrel.ppm')
-image2 = cv2.imread('../dataImg/squirrel_diff.ppm')
-image3 = cv2.imread('../dataImg/squirrel_utilisation_une.ppm')
-image4 = cv2.imread('../dataImg/squirrel_moyenne.ppm')
+image1 = cv2.imread('../dataImg/squirrel/squirrel.ppm')
+image2 = cv2.imread('../dataImg/squirrel/squirrel_diff.ppm')
+image3 = cv2.imread('../dataImg/squirrel/squirrel_utilisation_une.ppm')
+image4 = cv2.imread('../dataImg/squirrel/squirrel_moyenne.ppm')
+image5 = cv2.imread('../dataImg/squirrel/squirrel_mediane.ppm')
 
 # Assurez-vous que les images ont la même taille
 image1 = cv2.resize(image1, (image2.shape[1], image2.shape[0]))
 
 # Calculer le MI entre les deux images
 mi_value = compute_mi(image1, image2)
-print("Mutual Information (MI) entre les deux images: difference", mi_value)
+print("Mutual Information (MI): difference", mi_value)
 
 mi_value_deux = compute_mi(image1, image3)
-print("Mutual Information (MI) entre les deux images: utilisation unique ", mi_value_deux)
+print("Mutual Information (MI): utilisation unique ", mi_value_deux)
 
 mi_value_trois = compute_mi(image1, image4)
-print("Mutual Information (MI) entre les deux images: moyenne classique", mi_value_trois)
+print("Mutual Information (MI): moyenne classique", mi_value_trois)
+
+mi_value_quatre = compute_mi(image1, image5)
+print("Mutual Information (MI): mediane", mi_value_quatre)
