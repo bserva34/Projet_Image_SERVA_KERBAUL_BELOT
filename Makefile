@@ -11,11 +11,17 @@ run :
 compileMoyenne :
 	$(CPP) src/moyenne_imagette.cpp -o moyenne $(LIBS)
 
+compileMoyenneColor :
+	$(CPP) src/moyenne_imagetteColor.cpp -o moyenneColor $(LIBS)
+
 compileCarteMoyenne :
 	$(CPP) src/carte_moyenne.cpp -o carteMoyenne $(LIBS)
 
+compileCarteMoyenneColor :
+	$(CPP) src/carte_moyenneColor.cpp -o carteMoyenneColor $(LIBS)
+
 cleanCompiled :
-	rm -f main moyenne carteMoyenne
+	rm -f main moyenne moyenneColor carteMoyenne carteMoyenneColor
 
 cleanImagettes :
 	rm -f bash/*.txt imagettesRedim/*.pgm

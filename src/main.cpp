@@ -2,8 +2,12 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <fstream>
+#include <cstring>
 #include <algorithm>
 #include <string>
+
+#include <cstring>
 #include <cstdlib> // Pour la fonction system() qui permet d'éxécuter des commandes
 
 #include <gtkmm.h>
@@ -133,11 +137,34 @@ void listeImagettes(GtkWidget *button, gpointer data) {
         sprintf(command, "./bash/creation_liste_nom.sh %s ./bash/%s.txt",callbacks[3].directoryPath, fileNameOut);
         system(command); 
 
-        // Créer la liste contenant les moyennes de toutes les imagettes
-        sprintf(command, "make compileMoyenne");
-        system(command); 
-        sprintf(command, "./moyenne bash/%s.txt bash/%s_moyennes.txt %s/",fileNameOut,fileNameOut,callbacks[3].directoryPath);
-        system(command); 
+        // On veut savoir si ce sont des images couleurs ou ndg
+        std::string filePath = "./bash/";
+        filePath += fileNameOut;
+        filePath += ".txt";
+        std::fstream inputFile(filePath, std::ios::in);
+
+        std::string ligne;
+        std::getline(inputFile, ligne);
+        size_t length = ligne.length();
+        char* acc = (char*)ligne.c_str();
+        acc = acc + length - 3; // 3 derniers caractères
+        inputFile.close();
+
+        if (strcmp(acc, "pgm") == 0){ // Images pgm
+            // Créer la liste contenant les moyennes de toutes les imagettes
+            sprintf(command, "make compileMoyenne");
+            system(command); 
+            sprintf(command, "./moyenne bash/%s.txt bash/%s_moyennes.txt %s/",fileNameOut,fileNameOut,callbacks[3].directoryPath);
+            system(command); 
+        }else if (strcmp(acc, "ppm") == 0){ // Image ppm
+            sprintf(command, "make compileMoyenneColor");
+            system(command); 
+            sprintf(command, "./moyenneColor bash/%s.txt bash/%s_moyennes.txt %s/",fileNameOut,fileNameOut,callbacks[3].directoryPath);
+            system(command); 
+        }else{
+            std::cout << "Fichiers non reconnus\n";
+            return;
+        }
 
         char newLabel[300];
         sprintf(newLabel, "Les imagettes ont été listé dans %s_moyennes.txt", fileNameOut);
@@ -161,11 +188,44 @@ void makeMosaique(GtkWidget *button, gpointer data) {
     if (isChecked){
         nbUtilisation = atoi(g_strdup(gtk_entry_get_text(GTK_ENTRY(entryNbUtilisation))));
     }
+
+    // On veut savoir si ce sont des images couleurs ou ndg
+    std::string filePath = callbacks[6].directoryPath;
+    std::fstream inputFile(filePath, std::ios::in);
+
+    std::string ligne;
+    std::getline(inputFile, ligne);
+    // Position du premeir '.' rencontré dans la ligne
+    size_t pos = ligne.find('.'); 
+    char* acc = (char*)(ligne.substr(pos + 1, 3)).c_str(); // 3 premiers caractères suivants ce '.'
+
+    bool isColor = true;
+    char command1[700];
+    char command2[700];
+    char command3[700];
+    if (strcmp(acc, "pgm") == 0){ // Images pgm
+        isColor = false;
+        sprintf(command1, "make compileCarteMoyenne");
+        sprintf(command2, "./carteMoyenne %s dataImg/%s.pgm %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath,nbUtilisation);
+        sprintf(command3, "convert dataImg/%s.pgm dataImg/%s.png",fileNameOut,fileNameOut);
+    }else if (strcmp(acc, "ppm") == 0){ // Image ppm
+        sprintf(command1, "make compileCarteMoyenneColor");
+        sprintf(command2, "./carteMoyenneColor %s dataImg/%s.ppm %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath,nbUtilisation);
+        sprintf(command3, "convert dataImg/%s.ppm dataImg/%s.png",fileNameOut,fileNameOut);
+    }else{
+        std::cout << "Fichiers non reconnus\n";
+        return;
+    }
+    inputFile.close();
     
     if (nbImagette != 0 && tailleImagette != 0 && fileNameOut[0] != '\0' && callbacks[5].directoryPath != NULL && callbacks[6].directoryPath != NULL && callbacks[7].directoryPath != NULL && ((!isChecked) || (isChecked && nbUtilisation != 0) )){
         if (isChecked){
             int nW, nH;
-            lire_nb_lignes_colonnes_image_pgm(callbacks[5].directoryPath, &nH, &nW); // On lit les dimensions de l'image initiale
+            if (!isColor){
+                lire_nb_lignes_colonnes_image_pgm(callbacks[5].directoryPath, &nH, &nW); // On lit les dimensions de l'image initiale
+            }else{
+                lire_nb_lignes_colonnes_image_ppm(callbacks[5].directoryPath, &nH, &nW); // On lit les dimensions de l'image initiale
+            }
             if(nbImagette * nbUtilisation < pow(nH/tailleImagette,2)){ // Si le nombre maximale d'imagette que l'on peut utiiser (en tenant compte de la restriction si elle existe) est inférieur au nombre d'imagette nécessaire, alors on ne peut pas faire l'image mosaïque
                 char newLabel[300];
                 sprintf(newLabel, "Il n'y a pas suffisamment d'imagettes, ou alors il faut augmenter le nombre maximal de réutilisations");
@@ -174,43 +234,52 @@ void makeMosaique(GtkWidget *button, gpointer data) {
             }
         }
 
-        char command[700];
-
-        sprintf(command, "make compileCarteMoyenne");
-        system(command); 
-
-        sprintf(command, "./carteMoyenne %s dataImg/%s.pgm %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath,nbUtilisation);
-        system(command); 
+        system(command1); 
+        system(command2); 
 
         
         char newLabel[300];
-        sprintf(newLabel, "L'image mosaïque a été créée dans %s.pgm", fileNameOut);
+        sprintf(newLabel, "L'image mosaïque a été créée dans %s", fileNameOut);
         gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
 
         // Convertir l'image mosaïque en png et l'afficher sur la fenêtre (sans redimmensionner donc elle peut sortir de la fenêtre)
-        sprintf(command, "convert dataImg/%s.pgm dataImg/%s.png",fileNameOut,fileNameOut);
-        system(command); 
-        sprintf(command, "dataImg/%s.png",fileNameOut);
-        gtk_image_set_from_file(GTK_IMAGE(image), command);
+        system(command3); 
+        sprintf(command1, "dataImg/%s.png",fileNameOut);
+        gtk_image_set_from_file(GTK_IMAGE(image), command1);
 
         gtk_grid_attach(GTK_GRID(grid), image, 2, 1, 1,35); // Attention : Pour pas que l'image déplace tout, il faut qu'elle occupe plus de ligne (4è paramètre) que tout le reste réuni
         // gtk_widget_show_all(grid);
 
         // Calcul du PSNR
         OCTET *ImgIn, *ImgOut;
-        int height, width;
-        lire_nb_lignes_colonnes_image_pgm(callbacks[5].directoryPath, &height, &width);
-        int tailleImg = height * width;
         char cheminImgOut[200];
-        sprintf(cheminImgOut, "dataImg/%s.pgm",fileNameOut);
-        
-        
-        allocation_tableau(ImgIn, OCTET, tailleImg);
-        lire_image_pgm(callbacks[5].directoryPath, ImgIn, tailleImg);
-        allocation_tableau(ImgOut, OCTET, tailleImg);
-        lire_image_pgm(cheminImgOut, ImgOut, tailleImg);
+        int tailleImg;
+        int height, width;
+        if (!isColor){
+            lire_nb_lignes_colonnes_image_pgm(callbacks[5].directoryPath, &height, &width);
+            tailleImg = height * width;
+            sprintf(cheminImgOut, "dataImg/%s.pgm",fileNameOut);
+        }else{
+            lire_nb_lignes_colonnes_image_ppm(callbacks[5].directoryPath, &height, &width);
+            tailleImg = height * width;
+            sprintf(cheminImgOut, "dataImg/%s.ppm",fileNameOut);
+        }
 
-        double psnr = psnr_ndg(ImgIn,ImgOut,width,height);
+
+        double psnr;
+        if (isColor){
+            allocation_tableau(ImgIn, OCTET, tailleImg*3);
+            lire_image_ppm(callbacks[5].directoryPath, ImgIn, tailleImg);
+            allocation_tableau(ImgOut, OCTET, tailleImg*3);
+            lire_image_ppm(cheminImgOut, ImgOut, tailleImg);
+            psnr = psnr_color(ImgIn,ImgOut,width,height,width*height);
+        }else{
+            allocation_tableau(ImgIn, OCTET, tailleImg);
+            lire_image_pgm(callbacks[5].directoryPath, ImgIn, tailleImg);
+            allocation_tableau(ImgOut, OCTET, tailleImg);
+            lire_image_pgm(cheminImgOut, ImgOut, tailleImg);
+            psnr = psnr_ndg(ImgIn,ImgOut,width,height);
+        }
         char indicationPSNR[300];
         sprintf(indicationPSNR, "PSNR entre l'image initiale et l'image mosaïque = %f dB", psnr);
         gtk_label_set_text(GTK_LABEL(labelPSNR),indicationPSNR);
