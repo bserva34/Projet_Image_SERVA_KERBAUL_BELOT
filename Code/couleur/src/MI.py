@@ -40,6 +40,10 @@ image5 = cv2.imread('../dataImg/squirrel/squirrel_mediane.ppm')
 image1 = cv2.resize(image1, (image2.shape[1], image2.shape[0]))
 
 # Calculer le MI entre les deux images
+
+val_max = compute_mi(image1, image1)
+print("Mutual Information (MI): val max", val_max)
+
 mi_value = compute_mi(image1, image2)
 print("Mutual Information (MI): difference", mi_value)
 
