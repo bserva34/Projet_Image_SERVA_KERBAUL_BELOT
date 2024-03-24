@@ -7,24 +7,25 @@
 #include <vector>
 
 using namespace std;
-  
-bool deja_utiliser(std::vector<int> &used,int taille,int check){
-  for(int i=0;i<taille;i++){
-    if(used[i]==check){
-      return false;
-    }
+
+int nb_max_utilisation;
+
+bool deja_utiliser(std::vector<int> &used,int check){
+  if(used[check] >= nb_max_utilisation){
+    return false;
   }
   return true;
 }
+
 int main(int argc, char* argv[])
 {
   char cNomImgLue[250], cNomImgMosaique[250], cNomListeMoyenne[250], repertoireImagette[250];
-  int nH, nW, nTaille, S1;
+  int nH, nW, nTaille;
   int taille_imagette, nbImagette;
   
-  if (argc != 7) 
+  if (argc != 8) 
 	{
-		printf("Usage: ImageInitiale.pgm ImageMosaique.pgm ListeMoyenneImagettes TailleImagette NbImagette RepertoireImagettes\n"); 
+		printf("Usage: ImageInitiale.pgm ImageMosaique.pgm ListeMoyenneImagettes TailleImagette NbImagette RepertoireImagettes NbUtilisationMax\n"); 
 		return 1;
 	}
 
@@ -34,10 +35,16 @@ int main(int argc, char* argv[])
   sscanf (argv[4],"%d",&taille_imagette) ;
   sscanf (argv[5],"%d",&nbImagette) ;
   sscanf (argv[6],"%s",repertoireImagette) ;
+  sscanf (argv[7],"%d",&nb_max_utilisation) ;
 
   OCTET *ImgIn, *ImgOut;
    
   lire_nb_lignes_colonnes_image_pgm(cNomImgLue, &nH, &nW);
+
+  if (nb_max_utilisation == -1){ // On ne limite pas la réutilisation des imagettes
+    nb_max_utilisation = pow(nH/taille_imagette,2); // Nombre d'imagette nécessaire au maximum pour faire l'image mosaïque
+  }
+
   nTaille = nH * nW;
   
   allocation_tableau(ImgIn, OCTET, nTaille);
@@ -48,7 +55,7 @@ int main(int argc, char* argv[])
 
   string nom[nbImagette];
   double moy[nbImagette];
-  std::vector<int> used;
+  std::vector<int> used(nbImagette,0);
 
   std::fstream fichier(cNomListeMoyenne, std::ios::in);
       
@@ -83,21 +90,28 @@ int main(int argc, char* argv[])
       }
       moyenne=moyenne/(taille_imagette*taille_imagette);
 
-      int indice= 0;
-      char* acc = (char*)nom[0].c_str();;
-      double stock=moy[0];
-      for(int b=1;b<nbImagette;b++){
-        //if(deja_utiliser(used,used.size(),b)){
-          if(abs(moyenne-moy[b]) < abs(moyenne-stock)){
+      bool isFound = false;
+      int indice;
+      char* acc;
+      double stock;
+      for(int b=0;b<nbImagette;b++){
+        if(deja_utiliser(used,b)){
+          if (!isFound){
+            isFound = true;
+            stock=moy[b];
+            acc=(char*)nom[b].c_str();
+            indice=b;
+          }else if(abs(moyenne-moy[b]) <= abs(moyenne-stock)){
             stock=moy[b];
             acc=(char*)nom[b].c_str();
             indice=b;
           } 
-        //}       
+        }       
       }
       
-      char* res = new char[strlen(acc) + strlen(repertoireImagette) + 1];
+      char* res = new char[strlen(acc) + strlen(repertoireImagette) + 2];
       strcpy(res, repertoireImagette);
+      strcat(res, "/");
       strcat(res, acc);
 
       OCTET * Imgacc;
@@ -109,7 +123,7 @@ int main(int argc, char* argv[])
         }        
       }
       free(Imgacc);
-      //used.push_back(indice);
+      used[indice]++;
     }
   }    
 	

@@ -22,9 +22,16 @@
 
 #labelStep {
     font-weight: bold;
-    margin-top: 30px;
+    margin-top: 15px;
     color: black;
 }
+
+checkbutton {
+    color : black;
+    margin-left: 20px;
+    background: white;
+}
+
 window {
     background-color: white;
 }

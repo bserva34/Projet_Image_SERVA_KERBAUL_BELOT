@@ -9,23 +9,6 @@
 #include <gtkmm.h>
 #include "../include/image_ppm.h"
 
-double getPSNR_NDG(OCTET *ImgIn, OCTET *ImgOut, int width, int height){ // Calcule le PSNR entre les 2 images niveau de gris
-	double somme = 0.;
-	for(int x = 0; x < height ; ++x){
-		for(int y = 0; y < width; y++)
-		{
-			int In1 = (int) ImgIn[x*width + y];
-			int In2 = (int) ImgOut[x*width + y];
-			somme += pow(In1 - In2,2);
-		}
-	}
-
-	double taille = width * height;
-	double EQM = somme / taille;
-	double PSNR = 10 * log10(pow(255,2)/EQM);
-	return PSNR;
-}
-
 // On ne peut passer qu'un seul paramètre dans une fonction de callback
 typedef struct {
     char* directoryPath; // J'ai laissé directoryPath, mais on utilise aussi cette structure pour la sélection de fichier
@@ -41,11 +24,18 @@ GtkWidget *entry5;
 GtkWidget *entry6;
 GtkWidget *entry7;
 GtkWidget *entry8;
+GtkWidget *entryNbUtilisation;
+GtkWidget *checkboxNbUtilisation;
 
 GtkWidget* image;
 GtkWidget* labelPSNR; // Label sous l'image mosaïque qui donne le PSNR
 
 GtkWidget *grid;
+
+void on_checkbox_toggled(GtkToggleButton *togglebutton, gpointer entry) {
+    gboolean active = gtk_toggle_button_get_active(togglebutton);
+    gtk_widget_set_sensitive(GTK_WIDGET(entry), active);
+}
 
 void makeSelectDirectory(GtkWidget *button, gpointer data) {
 
@@ -166,14 +156,30 @@ void makeMosaique(GtkWidget *button, gpointer data) {
     int nbImagette = atoi(g_strdup(gtk_entry_get_text(GTK_ENTRY(entry6))));
     int tailleImagette = atoi(g_strdup(gtk_entry_get_text(GTK_ENTRY(entry7))));
     char* fileNameOut = g_strdup(gtk_entry_get_text(GTK_ENTRY(entry8)));
+    bool isChecked = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkboxNbUtilisation));
+    int nbUtilisation  = -1;
+    if (isChecked){
+        nbUtilisation = atoi(g_strdup(gtk_entry_get_text(GTK_ENTRY(entryNbUtilisation))));
+    }
     
-    if (nbImagette != 0 && tailleImagette != 0 && fileNameOut[0] != '\0' && callbacks[5].directoryPath != NULL && callbacks[6].directoryPath != NULL && callbacks[7].directoryPath != NULL){
+    if (nbImagette != 0 && tailleImagette != 0 && fileNameOut[0] != '\0' && callbacks[5].directoryPath != NULL && callbacks[6].directoryPath != NULL && callbacks[7].directoryPath != NULL && ((!isChecked) || (isChecked && nbUtilisation != 0) )){
+        if (isChecked){
+            int nW, nH;
+            lire_nb_lignes_colonnes_image_pgm(callbacks[5].directoryPath, &nH, &nW); // On lit les dimensions de l'image initiale
+            if(nbImagette * nbUtilisation < pow(nH/tailleImagette,2)){ // Si le nombre maximale d'imagette que l'on peut utiiser (en tenant compte de la restriction si elle existe) est inférieur au nombre d'imagette nécessaire, alors on ne peut pas faire l'image mosaïque
+                char newLabel[300];
+                sprintf(newLabel, "Il n'y a pas suffisamment d'imagettes, ou alors il faut augmenter le nombre maximal de réutilisations");
+                gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
+                return;
+            }
+        }
+
         char command[700];
 
         sprintf(command, "make compileCarteMoyenne");
         system(command); 
 
-        sprintf(command, "./carteMoyenne %s dataImg/%s.pgm %s %d %d %s/", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath);
+        sprintf(command, "./carteMoyenne %s dataImg/%s.pgm %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath,nbUtilisation);
         system(command); 
 
         
@@ -204,7 +210,7 @@ void makeMosaique(GtkWidget *button, gpointer data) {
         allocation_tableau(ImgOut, OCTET, tailleImg);
         lire_image_pgm(cheminImgOut, ImgOut, tailleImg);
 
-        double psnr = getPSNR_NDG(ImgIn,ImgOut,width,height);
+        double psnr = psnr_ndg(ImgIn,ImgOut,width,height);
         char indicationPSNR[300];
         sprintf(indicationPSNR, "PSNR entre l'image initiale et l'image mosaïque = %f dB", psnr);
         gtk_label_set_text(GTK_LABEL(labelPSNR),indicationPSNR);
@@ -332,10 +338,18 @@ int main(int argc, char **argv){
     gtk_grid_attach(GTK_GRID(grid), button8, 0, 20, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), labels[7], 0, 21, 2, 1);
 
+    entryNbUtilisation = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entryNbUtilisation), "Cochez pour modifier");
+    gtk_widget_set_sensitive(GTK_WIDGET(entryNbUtilisation), false); // Désactive initialement l'entry comme la checkbox n'est pas coché
+    gtk_grid_attach(GTK_GRID(grid), entryNbUtilisation, 0, 23, 1, 1);
+    checkboxNbUtilisation = gtk_check_button_new_with_label("Limiter le nombre de réutilisation");
+    g_signal_connect(checkboxNbUtilisation, "toggled", G_CALLBACK(on_checkbox_toggled), entryNbUtilisation);
+    gtk_grid_attach(GTK_GRID(grid), checkboxNbUtilisation, 0, 22, 1, 1);
+
     GtkWidget *button9 = gtk_button_new_with_label("Créer l'image mosaïque");
     gtk_widget_set_name(button9, "bID");
-    gtk_grid_attach(GTK_GRID(grid), button9, 0, 23, 1, 1);
-    gtk_grid_attach(GTK_GRID(grid), labels[8], 0, 24, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), button9, 0, 24, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), labels[8], 0, 25, 1, 1);
 
     image = gtk_image_new();
     labelPSNR = gtk_label_new("");
