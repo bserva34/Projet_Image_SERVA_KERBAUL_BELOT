@@ -31,7 +31,6 @@ GtkWidget *entry8;
 GtkWidget *entryNbUtilisation;
 GtkWidget *checkboxNbUtilisation;
 
-GtkWidget* image;
 GtkWidget* labelPSNR; // Label sous l'image mosaïque qui donne le PSNR
 
 GtkWidget *grid;
@@ -207,11 +206,11 @@ void makeMosaique(GtkWidget *button, gpointer data) {
         isColor = false;
         sprintf(command1, "make compileCarteMoyenne");
         sprintf(command2, "./carteMoyenne %s dataImg/%s.pgm %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath,nbUtilisation);
-        sprintf(command3, "convert dataImg/%s.pgm dataImg/%s.png",fileNameOut,fileNameOut);
+        sprintf(command3, "eog dataImg/%s.pgm &",fileNameOut);
     }else if (strcmp(acc, "ppm") == 0){ // Image ppm
         sprintf(command1, "make compileCarteMoyenneColor");
         sprintf(command2, "./carteMoyenneColor %s dataImg/%s.ppm %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath,nbUtilisation);
-        sprintf(command3, "convert dataImg/%s.ppm dataImg/%s.png",fileNameOut,fileNameOut);
+        sprintf(command3, "eog dataImg/%s.ppm &",fileNameOut);
     }else{
         std::cout << "Fichiers non reconnus\n";
         return;
@@ -242,13 +241,8 @@ void makeMosaique(GtkWidget *button, gpointer data) {
         sprintf(newLabel, "L'image mosaïque a été créée dans %s", fileNameOut);
         gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
 
-        // Convertir l'image mosaïque en png et l'afficher sur la fenêtre (sans redimmensionner donc elle peut sortir de la fenêtre)
+        // Afficher (grâce au visionneur d'image l'image mosaïque
         system(command3); 
-        sprintf(command1, "dataImg/%s.png",fileNameOut);
-        gtk_image_set_from_file(GTK_IMAGE(image), command1);
-
-        gtk_grid_attach(GTK_GRID(grid), image, 2, 1, 1,35); // Attention : Pour pas que l'image déplace tout, il faut qu'elle occupe plus de ligne (4è paramètre) que tout le reste réuni
-        // gtk_widget_show_all(grid);
 
         // Calcul du PSNR
         OCTET *ImgIn, *ImgOut;
@@ -420,7 +414,6 @@ int main(int argc, char **argv){
     gtk_grid_attach(GTK_GRID(grid), button9, 0, 24, 2, 1);
     gtk_grid_attach(GTK_GRID(grid), labels[8], 0, 25, 1, 1);
 
-    image = gtk_image_new();
     labelPSNR = gtk_label_new("");
     gtk_widget_set_name(labelPSNR, "labelSimple");
 

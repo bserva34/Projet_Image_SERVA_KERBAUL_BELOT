@@ -24,7 +24,7 @@ cleanCompiled :
 	rm -f main moyenne moyenneColor carteMoyenne carteMoyenneColor
 
 cleanImagettes :
-	rm -f bash/*.txt imagettesRedim/*.pgm
+	rm -f bash/*.txt imagettesRedim/*.pgm imagettesRedim/*.ppm
 
 cleanAll :
 	make cleanCompiled
