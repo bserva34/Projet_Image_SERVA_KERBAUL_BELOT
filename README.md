@@ -1,4 +1,5 @@
 **Pour convertir une vidéo couleur en niveau de gris :**
+
 sudo apt-get install ffmpeg  
 
 ffmpeg -i input.mp4 -vf format=gray output.mp4  
