@@ -8,7 +8,8 @@ https://online-video-cutter.com/fr/video-editor
 
 
 **Pour tester avec la vidéo fournit, faire :**
-> make 
+> make
+> 
 > make run
 
 **La vidéo mosaïque est produite dans le répertoire data**
