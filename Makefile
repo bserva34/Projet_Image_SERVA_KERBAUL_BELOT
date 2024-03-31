@@ -1,34 +1,15 @@
-LIBS = `pkg-config --cflags --libs gtkmm-3.0`
+LIBS = `pkg-config --cflags --libs opencv4`
 CPP = g++   
 CFLAGS = 'pkg-config --cflags gtkmm-3.0'
 
 compile : 
-	$(CPP) -o main src/main.cpp $(LIBS)
+	$(CPP) -o main src/mosaique_video.cpp $(LIBS)
 
 run : 
-	./main
+	./main ./data/short_video_gray.mp4 ./data/mosaique_gray.mp4 ./bash/liste_moyenne.txt 5 192 ./imagetteRedim
 
-compileMoyenne :
-	$(CPP) src/moyenne_imagette.cpp -o moyenne $(LIBS)
-
-compileMoyenneColor :
-	$(CPP) src/moyenne_imagetteColor.cpp -o moyenneColor $(LIBS)
-
-compileCarteMoyenne :
-	$(CPP) src/carte_moyenne.cpp -o carteMoyenne $(LIBS)
-
-compileCarteMoyenneColor :
-	$(CPP) src/carte_moyenneColor.cpp -o carteMoyenneColor $(LIBS)
-
-cleanCompiled :
-	rm -f main moyenne moyenneColor carteMoyenne carteMoyenneColor
-
-cleanImagettes :
-	rm -f bash/*.txt imagettesRedim/*.pgm imagettesRedim/*.ppm
-
-cleanAll :
-	make cleanCompiled
-	make cleanImagettes
+clean :
+	rm -f main
 
 
 
