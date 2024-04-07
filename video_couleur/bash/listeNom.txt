@@ -1,0 +1,16 @@
+grey_3.ppm
+blue_1.ppm
+red.ppm
+green_3.ppm
+green_1.ppm
+green_2.ppm
+green.ppm
+blue.ppm
+grey_1.ppm
+blue_3.ppm
+blue_2.ppm
+red_2.ppm
+grey_2.ppm
+white.ppm
+red_1.ppm
+black.ppm

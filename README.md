@@ -8,9 +8,24 @@ ffmpeg -i input.mp4 -vf format=gray output.mp4
 https://online-video-cutter.com/fr/video-editor
 
 
-**Pour tester avec la vidéo fournit, faire :**
+-------------------------------------------------------------------------------------------
+
+
+**Pour produire la vidéo mosaïque en niveau de gris (avec la vidéo fournie), faire :**
 > make
 > 
 > make run
 
 **La vidéo mosaïque est produite dans le répertoire data**
+
+
+-------------------------------------------------------------------------------------------
+
+
+**Pour produire la vidéo mosaïque en couleur (avec la vidéo fournie), faire :**
+> make
+>
+> make run
+
+**La vidéo mosaïque est produite dans le répertoire data**
+

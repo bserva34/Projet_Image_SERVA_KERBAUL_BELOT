@@ -1,0 +1,16 @@
+grey_3.ppm/43/45/43
+blue_1.ppm/0/0/48
+red.ppm/255/0/0
+green_3.ppm/68/230/76
+green_1.ppm/14/63/16
+green_2.ppm/58/138/62
+green.ppm/0/255/0
+blue.ppm/0/0/255
+grey_1.ppm/172/175/172
+blue_3.ppm/43/172/178
+blue_2.ppm/0/0/48
+red_2.ppm/174/67/67
+grey_2.ppm/102/110/103
+white.ppm/255/255/255
+red_1.ppm/104/9/9
+black.ppm/0/0/0
