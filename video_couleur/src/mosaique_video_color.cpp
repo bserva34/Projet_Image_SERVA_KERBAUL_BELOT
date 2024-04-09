@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
                 indice=b;
               }       
             }
-            if (std::find(alreadyUsed.begin(), alreadyUsed.end(), indice) == alreadyUsed.end() && alreadyUsed.size()){ // On ajoute si l'élément n'est pas déjà présent
+            if (std::find(alreadyUsed.begin(), alreadyUsed.end(), indice) == alreadyUsed.end() ){ // On ajoute si l'élément n'est pas déjà présent
               alreadyUsed.push_back(indice);
             }
           }else{

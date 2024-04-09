@@ -6,7 +6,7 @@ compile :
 	$(CPP) -o main src/mosaique_video_color.cpp $(LIBS)
 
 run : 
-	./main ./data/bsd.mp4 ./data/bsd_mos_rapide.mp4 ./bash/listeResultatCouleur.txt 10 41129 ../../Master_Imagine_Local/collection_imagette/couleur_10
+	./main ./data/bsd.mp4 ./data/bsd_mos_rapide.mp4 ./bash/listeResultatCouleur.txt 32 41129 ../../Master_Imagine_Local/collection_imagette/couleur
 
 clean :
 	rm -f main
