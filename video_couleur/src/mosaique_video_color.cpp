@@ -132,10 +132,10 @@ int main(int argc, char* argv[])
           moyenne_r=moyenne_r/(taille_imagette*taille_imagette);
           moyenne_g=moyenne_g/(taille_imagette*taille_imagette);
           moyenne_b=moyenne_b/(taille_imagette*taille_imagette);
-
+          char* acc;
           if (compteurFrame < maxLookFrame){
             int indice=0;
-            char* acc = (char*)nom[0].c_str();
+            acc = (char*)nom[0].c_str();
             double stock = abs(moyenne_r-moy_r[0])+abs(moyenne_g-moy_g[0])+abs(moyenne_b-moy_b[0]);
             for(int b=1;b<nbImagette;b++){
               if(abs(moyenne_r-moy_r[b])+abs(moyenne_g-moy_g[b])+abs(moyenne_b-moy_b[b]) < stock){
@@ -144,12 +144,12 @@ int main(int argc, char* argv[])
                 indice=b;
               }       
             }
-            if (std::find(alreadyUsed.begin(), alreadyUsed.end(), b) == alreadyUsed.end() ){ // On ajoute si l'élément n'est pas déjà présent
-              alreadyUsed.push_back(b);
+            if (std::find(alreadyUsed.begin(), alreadyUsed.end(), indice) == alreadyUsed.end() && alreadyUsed.size()){ // On ajoute si l'élément n'est pas déjà présent
+              alreadyUsed.push_back(indice);
             }
           }else{
             int indice=alreadyUsed[0];
-            char* acc = (char*)nom[alreadyUsed[0]].c_str();
+            acc = (char*)nom[alreadyUsed[0]].c_str();
             double stock = abs(moyenne_r-moy_r[alreadyUsed[0]])+abs(moyenne_g-moy_g[alreadyUsed[0]])+abs(moyenne_b-moy_b[alreadyUsed[0]]);
             for (int a = 1 ; a < alreadyUsed.size() ; a++){
               int b = alreadyUsed[a];
@@ -161,13 +161,12 @@ int main(int argc, char* argv[])
             }
           }
 
-        
-    
-          
+      
           char* res = new char[strlen(acc) + strlen(repertoireImagette) + 2];
           strcpy(res, repertoireImagette);
           strcat(res, "/");
           strcat(res, acc);
+
 
           OCTET * Imgacc;
           allocation_tableau(Imgacc, OCTET,taille_imagette*taille_imagette*3);
@@ -181,12 +180,13 @@ int main(int argc, char* argv[])
               ImgOut[pixel_index_out+2] = Imgacc[pixel_index_acc+2];
             }        
           }
-          if (compteurFrame < maxLookFrame){
-            ++compteurFrame;
-          }
-
           free(Imgacc);
         }
+      }
+
+      if (compteurFrame < maxLookFrame){
+        ++compteurFrame;
+        cout<<alreadyUsed.size()<<endl;
       }    
 
       // Ecrire l'image mosaique dans la nouvelle frame
