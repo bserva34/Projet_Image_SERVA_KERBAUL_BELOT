@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
                 indice=b;
               }       
             }
-            if (std::find(alreadyUsed.begin(), alreadyUsed.end(), indice) == alreadyUsed.end() ){ // On ajoute si l'élément n'est pas déjà présent
+            if (std::find(alreadyUsed.begin(), alreadyUsed.end(), indice) == alreadyUsed.end()){ // On ajoute si l'élément n'est pas déjà présent
               alreadyUsed.push_back(indice);
             }
           }else{
@@ -161,7 +161,6 @@ int main(int argc, char* argv[])
             }
           }
 
-      
           char* res = new char[strlen(acc) + strlen(repertoireImagette) + 2];
           strcpy(res, repertoireImagette);
           strcat(res, "/");
@@ -186,7 +185,7 @@ int main(int argc, char* argv[])
 
       if (compteurFrame < maxLookFrame){
         ++compteurFrame;
-        cout<<alreadyUsed.size()<<endl;
+        cout<<"nb imagette : " << alreadyUsed.size()<<endl;
       }    
 
       // Ecrire l'image mosaique dans la nouvelle frame
