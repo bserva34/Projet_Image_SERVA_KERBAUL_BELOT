@@ -82,6 +82,10 @@ int main(int argc, char* argv[])
   fichier.close();
 
   int nb = frame_width / taille_imagette; // Vidéo de dimension carrée uniquement
+  std::vector<int> alreadyUsed;
+
+  int compteurFrame = 0;
+  int maxLookFrame = 1; // Frame à partir de laquelle on ne regarde plus toutes les imagettes mais seulement celle déjà utilisées 
 
   while (true) {
       Mat frame;
@@ -129,16 +133,36 @@ int main(int argc, char* argv[])
           moyenne_g=moyenne_g/(taille_imagette*taille_imagette);
           moyenne_b=moyenne_b/(taille_imagette*taille_imagette);
 
-          int indice=0;
-          char* acc = (char*)nom[0].c_str();;
-          double stock = abs(moyenne_r-moy_r[0])+abs(moyenne_g-moy_g[0])+abs(moyenne_b-moy_b[0]);
-          for(int b=1;b<nbImagette;b++){
-            if(abs(moyenne_r-moy_r[b])+abs(moyenne_g-moy_g[b])+abs(moyenne_b-moy_b[b]) < stock){
-              stock=abs(moyenne_r-moy_r[b])+abs(moyenne_g-moy_g[b])+abs(moyenne_b-moy_b[b]);
-              acc=(char*)nom[b].c_str();
-              indice=b;
-            }       
+          if (compteurFrame < maxLookFrame){
+            int indice=0;
+            char* acc = (char*)nom[0].c_str();
+            double stock = abs(moyenne_r-moy_r[0])+abs(moyenne_g-moy_g[0])+abs(moyenne_b-moy_b[0]);
+            for(int b=1;b<nbImagette;b++){
+              if(abs(moyenne_r-moy_r[b])+abs(moyenne_g-moy_g[b])+abs(moyenne_b-moy_b[b]) < stock){
+                stock=abs(moyenne_r-moy_r[b])+abs(moyenne_g-moy_g[b])+abs(moyenne_b-moy_b[b]);
+                acc=(char*)nom[b].c_str();
+                indice=b;
+              }       
+            }
+            if (std::find(alreadyUsed.begin(), alreadyUsed.end(), b) == alreadyUsed.end() ){ // On ajoute si l'élément n'est pas déjà présent
+              alreadyUsed.push_back(b);
+            }
+          }else{
+            int indice=alreadyUsed[0];
+            char* acc = (char*)nom[alreadyUsed[0]].c_str();
+            double stock = abs(moyenne_r-moy_r[alreadyUsed[0]])+abs(moyenne_g-moy_g[alreadyUsed[0]])+abs(moyenne_b-moy_b[alreadyUsed[0]]);
+            for (int a = 1 ; a < alreadyUsed.size() ; a++){
+              int b = alreadyUsed[a];
+              if(abs(moyenne_r-moy_r[b])+abs(moyenne_g-moy_g[b])+abs(moyenne_b-moy_b[b]) < stock){
+                stock=abs(moyenne_r-moy_r[b])+abs(moyenne_g-moy_g[b])+abs(moyenne_b-moy_b[b]);
+                acc=(char*)nom[b].c_str();
+                indice=b;
+              }       
+            }
           }
+
+        
+    
           
           char* res = new char[strlen(acc) + strlen(repertoireImagette) + 2];
           strcpy(res, repertoireImagette);
@@ -157,6 +181,10 @@ int main(int argc, char* argv[])
               ImgOut[pixel_index_out+2] = Imgacc[pixel_index_acc+2];
             }        
           }
+          if (compteurFrame < maxLookFrame){
+            ++compteurFrame;
+          }
+
           free(Imgacc);
         }
       }    
