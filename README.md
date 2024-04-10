@@ -1,31 +1,18 @@
-**Pour convertir une vidéo couleur en niveau de gris :**
+# Actuellement :
+**Image mosaïque en niveau de gris uniquement**
 
-sudo apt-get install ffmpeg  
-
-ffmpeg -i input.mp4 -vf format=gray output.mp4  
-
-**Site pratique pour découper une vidéo :**
-https://online-video-cutter.com/fr/video-editor
-
-
--------------------------------------------------------------------------------------------
-
-
-**Pour produire la vidéo mosaïque en niveau de gris (avec la vidéo fournie), faire :**
-> make
-> 
-> make run
-
-**La vidéo mosaïque est produite dans le répertoire data**
-
-
--------------------------------------------------------------------------------------------
-
-
-**Pour produire la vidéo mosaïque en couleur (avec la vidéo fournie), faire :**
-> make
->
-> make run
-
-**La vidéo mosaïque est produite dans le répertoire data**
-
+Depuis *./Code/TP8_Image* :
+**Pour redimensionner les imagettes** (dans répertoire *bash*) : ./redimension_image.sh repertoireEntree repertoireSortie tailleRedimension
+> (Exemple : ./redimension.sh imagettes imagettesRedim 20)
+	
+**Pour lister toutes les imagettes redimensionnées dans un fichier** (dans répertoire *bash*): ./creation_liste_nom.sh repertoireEntree listeDesNoms
+> (Exemple : ./creation_liste_nom.sh imagettesRedim listeNom.txt)
+> Le fichier est créé dans le répertoire *bash*
+		
+**Pour calculer la moyenne de toutes les imagettes redimensionnées** (dans *src*) : moyenne_imagette.cpp produit le fichier listeResultat.txt
+> (Cible du Makefile : 'make compileMoyenne' puis 'make moyenneImagette')
+> Le fichier est créé dans le répertoire *bash*
+		
+**Pour créer l'image mosaïque** (dans *src*) : carte_moyenne.cpp produit l'image mosaïque + une image où chaque pixel est la moyenne d'une région (couverte par l'imagette) de l'image initiale
+> (Cible du Makefile : 'make compileCarteMoyenne' puis 'make carteMoyenne', changer les paramètres dans le Makefile si nécéssaire)
+> Attention à bien spécifier le nombre d'imagette dans le code, ainsi que leur taille
