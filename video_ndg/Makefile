@@ -11,6 +11,12 @@ run :
 clean :
 	rm -f main
 
+compileInterpolation : 
+	$(CPP) -o main src/mosaique_video_ndg_interpolation.cpp $(LIBS)
+
+runInterpolation : 
+	./main ./data/short_video_gray.mp4 ./data/mosaique_gray_interpolation.mp4 ./bash/liste_moyenne.txt 5 192 ./imagetteRedim
+
 
 
 
