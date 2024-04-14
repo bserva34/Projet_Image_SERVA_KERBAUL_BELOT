@@ -30,6 +30,8 @@ GtkWidget *entry7;
 GtkWidget *entry8;
 GtkWidget *entryNbUtilisation;
 GtkWidget *checkboxNbUtilisation;
+GtkWidget *entryNbFrameIntacte;
+GtkWidget *checkboxFrameIntacte;
 
 GtkWidget* labelPSNR; // Label sous l'image mosaïque qui donne le PSNR
 
@@ -182,43 +184,73 @@ void makeMosaique(GtkWidget *button, gpointer data) {
     int nbImagette = atoi(g_strdup(gtk_entry_get_text(GTK_ENTRY(entry6))));
     int tailleImagette = atoi(g_strdup(gtk_entry_get_text(GTK_ENTRY(entry7))));
     char* fileNameOut = g_strdup(gtk_entry_get_text(GTK_ENTRY(entry8)));
-    bool isChecked = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkboxNbUtilisation));
+    bool isCheckedNbReutilisation = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkboxNbUtilisation));
     int nbUtilisation  = -1;
-    if (isChecked){
+    if (isCheckedNbReutilisation){
         nbUtilisation = atoi(g_strdup(gtk_entry_get_text(GTK_ENTRY(entryNbUtilisation))));
     }
+    bool isCheckedOptimisationVideo = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkboxFrameIntacte));
+    int nbFrameIntacte  = -1;
+    if (isCheckedOptimisationVideo){
+        nbFrameIntacte = atoi(g_strdup(gtk_entry_get_text(GTK_ENTRY(entryNbFrameIntacte))));
+    }
 
-    // On veut savoir si ce sont des images couleurs ou ndg
-    std::string filePath = callbacks[6].directoryPath;
-    std::fstream inputFile(filePath, std::ios::in);
+    // On veut savoir si c'est une image/vidéo couleur ou ndg
+    std::string filePath = callbacks[5].directoryPath;
 
-    std::string ligne;
-    std::getline(inputFile, ligne);
-    // Position du premeir '.' rencontré dans la ligne
-    size_t pos = ligne.find('.'); 
-    char* acc = (char*)(ligne.substr(pos + 1, 3)).c_str(); // 3 premiers caractères suivants ce '.'
+    // Position du premier '.' rencontré dans le nom du fichier initiale
+    size_t pos = filePath.find('.'); 
+    char* acc = (char*)(filePath.substr(pos + 1, 3)).c_str(); // 3 premiers caractères suivants ce '.'
 
     bool isColor = true;
+    bool isImage = true;
+
     char command1[700];
     char command2[700];
     char command3[700];
+    char command4[700];
     if (strcmp(acc, "pgm") == 0){ // Images pgm
         isColor = false;
         sprintf(command1, "make compileCarteMoyenne");
         sprintf(command2, "./carteMoyenne %s dataImg/%s.pgm %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath,nbUtilisation);
         sprintf(command3, "eog dataImg/%s.pgm &",fileNameOut);
+        sprintf(command4, "eog %s &",callbacks[5].directoryPath);
     }else if (strcmp(acc, "ppm") == 0){ // Image ppm
         sprintf(command1, "make compileCarteMoyenneColor");
         sprintf(command2, "./carteMoyenneColor %s dataImg/%s.ppm %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath,nbUtilisation);
         sprintf(command3, "eog dataImg/%s.ppm &",fileNameOut);
+        sprintf(command4, "eog %s &",callbacks[5].directoryPath);
+    }else if (strcmp(acc,"mp4") == 0){ // Vidéo mp4 (ndg ou couleur, on ne fait pas la différence)
+        isImage = false;
+        // On veut savoir si on traite une vidéo couleur ou ndg
+        std::string imagettesPath = callbacks[6].directoryPath;
+        std::fstream inputFile(imagettesPath, std::ios::in);
+        std::string ligne;
+        std::getline(inputFile, ligne);
+        // Position du premeir '.' rencontré dans la ligne
+        size_t typeImagettes = ligne.find('.'); 
+        char* acc2 = (char*)(ligne.substr(typeImagettes + 1, 3)).c_str(); // 3 premiers caractères suivants ce '.'
+
+        if (strcmp(acc2,"ppm") == 0){
+            sprintf(command1, "make compileVideoCouleur");
+            sprintf(command2, "./videoCouleur %s dataVideo/%s.mp4 %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath, nbFrameIntacte);
+        }else if(strcmp(acc2,"pgm") == 0){
+            sprintf(command1, "make compileVideoNDG");
+            sprintf(command2, "./videoNdg %s dataVideo/%s.mp4 %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath, nbFrameIntacte);
+        }else{
+            std::cout << "Fichiers non reconnus\n";
+            return;
+        }
+        sprintf(command3, "mplayer -loop 0 -fixed-vo dataVideo/%s.mp4 &",fileNameOut);
+        sprintf(command4, "mplayer -loop 0 -fixed-vo %s &",callbacks[5].directoryPath);
+        
     }else{
         std::cout << "Fichiers non reconnus\n";
         return;
     }
-    inputFile.close();
     
-    if (nbImagette != 0 && tailleImagette != 0 && fileNameOut[0] != '\0' && callbacks[5].directoryPath != NULL && callbacks[6].directoryPath != NULL && callbacks[7].directoryPath != NULL && ((!isChecked) || (isChecked && nbUtilisation != 0) )){
-        if (isChecked){
+    if (nbImagette != 0 && tailleImagette != 0 && fileNameOut[0] != '\0' && callbacks[5].directoryPath != NULL && callbacks[6].directoryPath != NULL && callbacks[7].directoryPath != NULL && ((!isCheckedNbReutilisation) || (isCheckedNbReutilisation && nbUtilisation != 0)) && ((!isCheckedOptimisationVideo) || (isCheckedOptimisationVideo && nbFrameIntacte > 0)) ){
+        if (isCheckedNbReutilisation){
             int nW, nH;
             if (!isColor){
                 lire_nb_lignes_colonnes_image_pgm(callbacks[5].directoryPath, &nH, &nW); // On lit les dimensions de l'image initiale
@@ -238,47 +270,51 @@ void makeMosaique(GtkWidget *button, gpointer data) {
 
         
         char newLabel[300];
-        sprintf(newLabel, "L'image mosaïque a été créée dans %s", fileNameOut);
+        sprintf(newLabel, "L'image/vidéo mosaïque a été créée dans %s", fileNameOut);
         gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
 
-        // Afficher (grâce au visionneur d'image l'image mosaïque
+        // Afficher l'image initiale l'image mosaïque (grâce au visionneur d'image) l'image mosaïque
+        system(command4); 
         system(command3); 
 
-        // Calcul du PSNR
-        OCTET *ImgIn, *ImgOut;
-        char cheminImgOut[200];
-        int tailleImg;
-        int height, width;
-        if (!isColor){
-            lire_nb_lignes_colonnes_image_pgm(callbacks[5].directoryPath, &height, &width);
-            tailleImg = height * width;
-            sprintf(cheminImgOut, "dataImg/%s.pgm",fileNameOut);
-        }else{
-            lire_nb_lignes_colonnes_image_ppm(callbacks[5].directoryPath, &height, &width);
-            tailleImg = height * width;
-            sprintf(cheminImgOut, "dataImg/%s.ppm",fileNameOut);
-        }
+        if (isImage){ // Attention à ne pas calculer le PSNR pour les vidéos
+
+            // Calcul du PSNR
+            OCTET *ImgIn, *ImgOut;
+            char cheminImgOut[200];
+            int tailleImg;
+            int height, width;
+            if (!isColor){
+                lire_nb_lignes_colonnes_image_pgm(callbacks[5].directoryPath, &height, &width);
+                tailleImg = height * width;
+                sprintf(cheminImgOut, "dataImg/%s.pgm",fileNameOut);
+            }else{
+                lire_nb_lignes_colonnes_image_ppm(callbacks[5].directoryPath, &height, &width);
+                tailleImg = height * width;
+                sprintf(cheminImgOut, "dataImg/%s.ppm",fileNameOut);
+            }
 
 
-        double psnr;
-        if (isColor){
-            allocation_tableau(ImgIn, OCTET, tailleImg*3);
-            lire_image_ppm(callbacks[5].directoryPath, ImgIn, tailleImg);
-            allocation_tableau(ImgOut, OCTET, tailleImg*3);
-            lire_image_ppm(cheminImgOut, ImgOut, tailleImg);
-            psnr = psnr_color(ImgIn,ImgOut,width,height,width*height);
-        }else{
-            allocation_tableau(ImgIn, OCTET, tailleImg);
-            lire_image_pgm(callbacks[5].directoryPath, ImgIn, tailleImg);
-            allocation_tableau(ImgOut, OCTET, tailleImg);
-            lire_image_pgm(cheminImgOut, ImgOut, tailleImg);
-            psnr = psnr_ndg(ImgIn,ImgOut,width,height);
+            double psnr;
+            if (isColor){
+                allocation_tableau(ImgIn, OCTET, tailleImg*3);
+                lire_image_ppm(callbacks[5].directoryPath, ImgIn, tailleImg);
+                allocation_tableau(ImgOut, OCTET, tailleImg*3);
+                lire_image_ppm(cheminImgOut, ImgOut, tailleImg);
+                psnr = psnr_color(ImgIn,ImgOut,width,height,width*height);
+            }else{
+                allocation_tableau(ImgIn, OCTET, tailleImg);
+                lire_image_pgm(callbacks[5].directoryPath, ImgIn, tailleImg);
+                allocation_tableau(ImgOut, OCTET, tailleImg);
+                lire_image_pgm(cheminImgOut, ImgOut, tailleImg);
+                psnr = psnr_ndg(ImgIn,ImgOut,width,height);
+            }
+            char indicationPSNR[300];
+            sprintf(indicationPSNR, "PSNR entre l'image initiale et l'image mosaïque = %f dB", psnr);
+            gtk_label_set_text(GTK_LABEL(labelPSNR),indicationPSNR);
+            gtk_grid_attach(GTK_GRID(grid), labelPSNR, 2, 0, 2, 1);
+            gtk_widget_show_all(grid);
         }
-        char indicationPSNR[300];
-        sprintf(indicationPSNR, "PSNR entre l'image initiale et l'image mosaïque = %f dB", psnr);
-        gtk_label_set_text(GTK_LABEL(labelPSNR),indicationPSNR);
-        gtk_grid_attach(GTK_GRID(grid), labelPSNR, 2, 0, 2, 1);
-        gtk_widget_show_all(grid);
 
     }else{
         char newLabel[300];
@@ -373,7 +409,7 @@ int main(int argc, char **argv){
     gtk_grid_attach(GTK_GRID(grid), button5, 1, 11, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), labels[4], 0, 12, 2, 1);
 
-    GtkWidget *labelStep3 = gtk_label_new("Etape 3 : Créer l'image mosaïque");
+    GtkWidget *labelStep3 = gtk_label_new("Etape 3 : Créer l'image/la vidéo mosaïque");
     gtk_widget_set_name(labelStep3, "labelStep");
     gtk_grid_attach(GTK_GRID(grid), labelStep3, 0, 14, 2, 1);
     entry6 = gtk_entry_new();
@@ -384,12 +420,12 @@ int main(int argc, char **argv){
     gtk_entry_set_placeholder_text(GTK_ENTRY(entry7), "Tailles des imagettes");
     gtk_entry_set_width_chars(GTK_ENTRY(entry7), 22);
     gtk_grid_attach(GTK_GRID(grid), entry7, 1, 15, 1, 1);
-    GtkWidget *button6 = gtk_button_new_with_label("Choisir image initiale");
+    GtkWidget *button6 = gtk_button_new_with_label("Choisir image/vidéo initiale");
     gtk_widget_set_name(button6, "bID");
     gtk_grid_attach(GTK_GRID(grid), button6, 0, 16, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), labels[5], 0, 17, 2, 1);
     entry8 = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry8), "Nom image mosaïque");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry8), "Nom image/vidéo mosaïque");
     gtk_entry_set_width_chars(GTK_ENTRY(entry8), 22);
     gtk_grid_attach(GTK_GRID(grid), entry8, 1, 16, 1, 1);
     GtkWidget *button7 = gtk_button_new_with_label("Fichier moyennes imagettes");
@@ -405,9 +441,17 @@ int main(int argc, char **argv){
     gtk_entry_set_placeholder_text(GTK_ENTRY(entryNbUtilisation), "Cochez pour modifier");
     gtk_widget_set_sensitive(GTK_WIDGET(entryNbUtilisation), false); // Désactive initialement l'entry comme la checkbox n'est pas coché
     gtk_grid_attach(GTK_GRID(grid), entryNbUtilisation, 0, 23, 1, 1);
-    checkboxNbUtilisation = gtk_check_button_new_with_label("Limiter le nombre de réutilisation");
+    checkboxNbUtilisation = gtk_check_button_new_with_label("Limiter le nombre de réutilisation (pour les images uniquement)");
     g_signal_connect(checkboxNbUtilisation, "toggled", G_CALLBACK(on_checkbox_toggled), entryNbUtilisation);
     gtk_grid_attach(GTK_GRID(grid), checkboxNbUtilisation, 0, 22, 1, 1);
+
+    entryNbFrameIntacte = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entryNbFrameIntacte), "Cochez pour modifier");
+    gtk_widget_set_sensitive(GTK_WIDGET(entryNbFrameIntacte), false); // Désactive initialement l'entry comme la checkbox n'est pas coché
+    gtk_grid_attach(GTK_GRID(grid), entryNbFrameIntacte, 1, 23, 1, 1);
+    checkboxFrameIntacte = gtk_check_button_new_with_label("Activer la production rapide (pour les vidéos uniquement)");
+    g_signal_connect(checkboxFrameIntacte, "toggled", G_CALLBACK(on_checkbox_toggled), entryNbFrameIntacte);
+    gtk_grid_attach(GTK_GRID(grid), checkboxFrameIntacte, 1, 22, 1, 1);
 
     GtkWidget *button9 = gtk_button_new_with_label("Créer l'image mosaïque");
     gtk_widget_set_name(button9, "bID");
