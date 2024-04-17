@@ -35,6 +35,7 @@ image2 = cv2.imread('../dataImg/squirrel/squirrel_diff.ppm')
 image3 = cv2.imread('../dataImg/squirrel/squirrel_utilisation_une.ppm')
 image4 = cv2.imread('../dataImg/squirrel/squirrel_moyenne.ppm')
 image5 = cv2.imread('../dataImg/squirrel/squirrel_mediane.ppm')
+image6 = cv2.imread('../dataImg/squirrel/squirrel_sift.ppm')
 
 # Assurez-vous que les images ont la même taille
 image1 = cv2.resize(image1, (image2.shape[1], image2.shape[0]))
@@ -55,3 +56,6 @@ print("Mutual Information (MI): moyenne classique", mi_value_trois)
 
 mi_value_quatre = compute_mi(image1, image5)
 print("Mutual Information (MI): mediane", mi_value_quatre)
+
+mi_value_cinq = compute_mi(image1, image6)
+print("Mutual Information (MI): sift", mi_value_cinq)

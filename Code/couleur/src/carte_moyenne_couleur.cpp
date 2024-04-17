@@ -9,7 +9,7 @@
 using namespace std;
   
 
-int nb_max_utilisation = 1;
+int nb_max_utilisation = 100;
 
 bool deja_utiliser(std::vector<int> &used,int check){
   if(used[check]>=nb_max_utilisation){
@@ -17,6 +17,7 @@ bool deja_utiliser(std::vector<int> &used,int check){
   }
   return true;
 }
+
 int main(int argc, char* argv[])
 {
   char cNomImgLue[250], cNomImgBloc[250], cNomImgMosaique[250], cNomListeMoyenne[250];
@@ -45,10 +46,11 @@ int main(int argc, char* argv[])
   allocation_tableau(ImgIn, OCTET, nTaille*3);
   lire_image_ppm(cNomImgLue, ImgIn, nH * nW);
 
-  int taille_imagette=32; // Taille des imagettes (carrée), à adapter
+  int taille_imagette=10; // Taille des imagettes (carrée), à adapter
 
-  int nb=nH/taille_imagette;
-  allocation_tableau(ImgOut, OCTET, nb*nb*3);
+  int nb_h=nH/taille_imagette;
+  int nb_w=nW/taille_imagette;
+  allocation_tableau(ImgOut, OCTET, nb_h*nb_w*3);
   allocation_tableau(ImgOut2, OCTET, nTaille*3);
 
   string nom[nbImagette];
@@ -93,8 +95,8 @@ int main(int argc, char* argv[])
   fichier.close();
 
   double moyenne_r,moyenne_g,moyenne_b;
-  for(int i=0;i<nb;i++){
-    for(int j=0;j<nb;j++){
+  for(int i=0;i<nb_h;i++){
+    for(int j=0;j<nb_w;j++){
       moyenne_r=0;
       moyenne_g=0;
       moyenne_b=0;
@@ -110,9 +112,9 @@ int main(int argc, char* argv[])
       moyenne_g /= (taille_imagette * taille_imagette);
       moyenne_b /= (taille_imagette * taille_imagette);
 
-      ImgOut[(i * nb + j) * 3] = moyenne_r;
-      ImgOut[(i * nb + j) * 3 + 1] = moyenne_g;
-      ImgOut[(i * nb + j) * 3 + 2] = moyenne_b;
+      ImgOut[(i * nb_w + j) * 3] = moyenne_r;
+      ImgOut[(i * nb_w + j) * 3 + 1] = moyenne_g;
+      ImgOut[(i * nb_w + j) * 3 + 2] = moyenne_b;
 
       int indice= 0;
       char* acc = (char*)nom[0].c_str();;
@@ -128,7 +130,7 @@ int main(int argc, char* argv[])
         }       
       }
       
-      char* acc2 = "../../../../Master_Imagine_local/collection_imagette/couleur/";
+      char* acc2 = "../../../../Master_Imagine_local/collection_imagette/couleur_10/";
       //char* acc2 = "imagettesRedim/";
       char* res = new char[strlen(acc) + strlen(acc2) + 1];
       strcpy(res, acc2);
@@ -153,7 +155,7 @@ int main(int argc, char* argv[])
     }
   }    
   
-  ecrire_image_ppm(cNomImgBloc,ImgOut,nb,nb);
+  ecrire_image_ppm(cNomImgBloc,ImgOut,nb_h,nb_w);
   ecrire_image_ppm(cNomImgMosaique,ImgOut2,nH,nW);
   free(ImgIn); free(ImgOut);
 

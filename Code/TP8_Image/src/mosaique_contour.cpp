@@ -29,14 +29,30 @@ int main(int argc, char* argv[])
   sscanf (argv[3],"%s",cNomImgMosaique) ;
   sscanf (argv[4],"%s",cNomListeMoyenne) ;
 
+  string nom[nbImagette];
+  double moy[nbImagette];
 
-  //creat contour
-  cv::Mat image = cv::imread(cNomImgLue,cv::IMREAD_GRAYSCALE);
-  cv::Mat contours;
-  cv::Canny(image, contours, 100, 200);
-  cv::imwrite(cNomImgBloc,contours);
+  std::fstream fichier_un("../bash/listeResultat.txt", std::ios::in);
+      
+  if (!fichier_un.is_open()) {
+    std::cerr << "Erreur lors de l'ouverture du fichier d'entrée." << std::endl;
+    return 1;
+  }
 
+  std::string ligne_un;
+  int cpt=0;
+  while (std::getline(fichier_un, ligne_un)) {
+    size_t positionSlash = ligne_un.find('/');
 
+    std::string partieAvantSlash = ligne_un.substr(0, positionSlash);
+    std::string partieApresSlash = ligne_un.substr(positionSlash + 1);
+    double val = std::stod(partieApresSlash);
+
+    nom[cpt]=partieAvantSlash;
+    moy[cpt]=val;
+    cpt++;
+  }
+  fichier_un.close();
 
 
   //lecture et alloc
@@ -46,7 +62,8 @@ int main(int argc, char* argv[])
   nTaille = nH * nW;
   
   allocation_tableau(ImgIn, OCTET, nTaille);
-  lire_image_pgm(cNomImgBloc, ImgIn, nH * nW);
+  //lire_image_pgm(cNomImgBloc, ImgIn, nH * nW);
+  lire_image_pgm(cNomImgLue, ImgIn, nH * nW);
 
   int taille_imagette=20; // Taille des imagettes (carrée), à adapter
 
@@ -67,81 +84,115 @@ int main(int argc, char* argv[])
   string chemin = "../../../../Master_Imagine_local/collection_imagette/contour_ndg/";
   string chemin_deux= "../../../../Master_Imagine_local/collection_imagette/redimensionner/";
   while (std::getline(fichier, ligne)) {
-    nomImagettes.push_back(chemin+ligne);
+    nomImagettes.push_back(chemin_deux+ligne);
   }
 
   fichier.close();
 
   Ptr<SIFT> sift = SIFT::create();
 
-  std::vector<Mat> descriptors_imagettes;
+  std::vector<int> descriptors_imagettes;
   for (const auto& nom : nomImagettes) {
     Mat imagette = imread(nom, IMREAD_GRAYSCALE);
+    if (imagette.empty()) {
+        std::cerr << "Erreur : Impossible de charger l'image " << nom << std::endl;
+        continue; // Passer à l'image suivante
+    }
     std::vector<KeyPoint> keypoints;
-    Mat descriptors;
-    sift->detectAndCompute(imagette, noArray(), keypoints, descriptors);
-    descriptors_imagettes.push_back(descriptors);
+    sift->detect(imagette,keypoints);
+    descriptors_imagettes.push_back(keypoints.size());
   }
-
-
-  cout<<"sift imagettes ok de taille  : "<<descriptors_imagettes.size()<<endl;
 
 
   for (int i = 0; i < nb; i++) {
     for (int j = 0; j < nb; j++) {
       OCTET* Imgprov;
       allocation_tableau(Imgprov, OCTET, taille_imagette * taille_imagette);
+      double moyenne=0;
       for (int x = 0; x < taille_imagette; x++) {
         for (int y = 0; y < taille_imagette; y++) {
           Imgprov[x * taille_imagette + y] = ImgIn[(i * taille_imagette * nW) + (x * nW) + (j * taille_imagette) + y];
+          moyenne+=ImgIn[(i * taille_imagette * nW) + (x * nW) + (j * taille_imagette) + y];
         }
       }
+      moyenne=moyenne/(taille_imagette*taille_imagette);
 
       ecrire_image_pgm("imgprov.pgm",Imgprov,taille_imagette,taille_imagette);
 
       // Détecter les points clés et calculer les descripteurs de ImgProv      
       Mat imgprov = imread("imgprov.pgm", IMREAD_GRAYSCALE);
       std::vector<KeyPoint> keypoints_imgprov;
-      Mat descriptors_imgprov;
-      sift->detectAndCompute(imgprov, noArray(), keypoints_imgprov, descriptors_imgprov);
-      //cout<<"calcul descripteur sous zone : "<<i*nb+j<<endl;
+      sift->detect(imgprov,keypoints_imgprov);
 
-      if (keypoints_imgprov.size() > 0) {
-        BFMatcher matcher(NORM_HAMMING);
-        std::vector<std::vector<DMatch>> matches;
-        matcher.knnMatch(descriptors_imgprov, descriptors_imagettes, matches, 2, noArray(), false);
-
-        std::vector<DMatch> good_matches;
-        for (size_t i = 0; i < matches.size(); ++i) {
-            if (matches[i].size() >= 2 && matches[i][0].distance < 0.75 * matches[i][1].distance) {
-                good_matches.push_back(matches[i][0]);
-            }
+      int nb_sous_zone=keypoints_imgprov.size();
+      //if ( nb_sous_zone> 0) {
+        int acc=0;
+        int stock = 0;
+      
+        int taille_prov=descriptors_imagettes.size();
+        std::vector<int> ecart;
+        std::vector<int> indice_equi;
+        for(int k=0;k<taille_prov;++k){
+          ecart.push_back(abs(nb_sous_zone-descriptors_imagettes[k]));
+          if(abs(nb_sous_zone-descriptors_imagettes[k])==0){
+            indice_equi.push_back(k);
+          }
         }
-        cout<<good_matches.size()<<endl;
 
-        if (!good_matches.empty()) {
-            double min_distance = good_matches[0].distance;
-            int best_imagette_index = 0;
-            for (size_t i = 1; i < good_matches.size(); ++i) {
-                if (good_matches[i].distance < min_distance) {
-                    min_distance = good_matches[i].distance;
-                    best_imagette_index = i;
-                }
+        if (indice_equi.size()>0) {
+            OCTET* best;
+            int indice= 0;
+            char* acc = (char*)nom[indice_equi[0]].c_str();;
+            double stock=moy[indice_equi[0]];
+            for(int k=0;k<indice_equi.size();++k){
+              if(abs(moy[indice_equi[k]]-moyenne)<abs(stock-moyenne)){
+                stock=moy[indice_equi[k]];
+                indice=indice_equi[k];
+              }
             }
-
-            Mat best_imagette = imread(chemin_deux + nomImagettes[best_imagette_index], IMREAD_GRAYSCALE);
-            // Écrire la meilleure imagette dans l'image mosaïque à la position (i, j)
+            allocation_tableau(best, OCTET, taille_imagette * taille_imagette);
+            //char* acc3 = (char*)nomImagettes[indice].c_str();
+            acc = (char*)nom[indice].c_str();
+            char* acc2 = (char*)chemin_deux.c_str();
+            char* res = new char[strlen(acc) + strlen(acc2) + 1];
+            strcpy(res, acc2);
+            strcat(res, acc);
+            lire_image_pgm(res,best,taille_imagette*taille_imagette);
             for (int x = 0; x < taille_imagette; x++) {
                 for (int y = 0; y < taille_imagette; y++) {
-                    ImgOut[(i * taille_imagette * nW) + (x * nW) + (j * taille_imagette) + y] = best_imagette.at<uchar>(x, y);
+                    ImgOut[(i * taille_imagette * nW) + (x * nW) + (j * taille_imagette) + y] = best[x * taille_imagette + y];
                 }
             }
-        }
+
 
         free(Imgprov);
     }
     else{
-              //faire la technique de la difference
+      int indice= 0;
+      char* acc = (char*)nom[0].c_str();
+      double stock=moy[0];
+      for(int b=1;b<nbImagette;b++){
+          if(abs(moyenne-moy[b]) < abs(moyenne-stock)){
+            stock=moy[b];
+            acc=(char*)nom[b].c_str();
+            indice=b;
+          }     
+      }
+      
+      char* acc2 = (char*)chemin_deux.c_str();
+      char* res = new char[strlen(acc) + strlen(acc2) + 1];
+      strcpy(res, acc2);
+      strcat(res, acc);
+
+      OCTET * Imgacc;
+      allocation_tableau(Imgacc, OCTET,taille_imagette*taille_imagette);
+      lire_image_pgm(res,Imgacc,taille_imagette*taille_imagette);
+      for(int z=0;z<taille_imagette;z++){
+        for(int k=0;k<taille_imagette;k++){
+          ImgOut[(i * taille_imagette *nW) + (z * nW) + (j * taille_imagette) + k] = Imgacc[z * taille_imagette + k];
+        }        
+      }
+      free(Imgacc);
 
     }
   }
