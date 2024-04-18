@@ -9,7 +9,7 @@
 using namespace std;
   
 
-int nb_max_utilisation = 100;
+int nb_max_utilisation = 1000;
 
 bool deja_utiliser(std::vector<int> &used,int check){
   if(used[check]>=nb_max_utilisation){
@@ -153,7 +153,27 @@ int main(int argc, char* argv[])
       //cout<<i*nW+j<<endl;
       used[indice]++;
     }
-  }    
+  }   
+
+
+  std::string liste_entree = "../bash/occurence.dat";
+  std::string liste_sortie = "../bash/occurence_new.dat";
+
+  std::fstream fichier_entree(liste_entree, std::ios::in);
+  std::fstream fichier_sortie(liste_sortie,std::ios::out);
+
+  std::string ligne_entree;
+  int cpt_sortie=0;
+  while (std::getline(fichier_entree, ligne_entree)) {
+    char * acc=(char*) ligne_entree.c_str();
+    int val = atoi(acc);
+    val+=used[cpt_sortie];
+
+    cpt_sortie++;
+    fichier_sortie << val << std::endl;
+  }
+  fichier_entree.close();
+  fichier_sortie.close();
   
   ecrire_image_ppm(cNomImgBloc,ImgOut,nb_h,nb_w);
   ecrire_image_ppm(cNomImgMosaique,ImgOut2,nH,nW);
