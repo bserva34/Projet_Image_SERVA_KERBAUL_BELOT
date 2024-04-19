@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
     }
   }   
 
-
+  /*
   std::string liste_entree = "../bash/occurence.dat";
   std::string liste_sortie = "../bash/occurence_new.dat";
 
@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
     fichier_sortie << val << std::endl;
   }
   fichier_entree.close();
-  fichier_sortie.close();
+  fichier_sortie.close();*/
   
   ecrire_image_ppm(cNomImgBloc,ImgOut,nb_h,nb_w);
   ecrire_image_ppm(cNomImgMosaique,ImgOut2,nH,nW);
