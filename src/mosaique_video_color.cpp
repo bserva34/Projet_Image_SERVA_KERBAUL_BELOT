@@ -82,7 +82,8 @@ int main(int argc, char* argv[])
   }
   fichier.close();
 
-  int nb = frame_width / taille_imagette; // Vidéo de dimension carrée uniquement
+  int nb_w = frame_width / taille_imagette;
+  int nb_h = frame_height / taille_imagette;
   std::vector<int> alreadyUsed; // Sert uniquement si on coche l'option d'optimisation dans l'application
   int compteurFrame = 0;
 
@@ -115,8 +116,8 @@ int main(int argc, char* argv[])
       Mat frameMosa;
       frameMosa.create(frame_width, frame_height, CV_8UC3);
       double moyenne_r, moyenne_g, moyenne_b;
-      for(int i=0;i<nb;i++){
-        for(int j=0;j<nb;j++){
+      for(int i=0;i<nb_h;i++){
+        for(int j=0;j<nb_w;j++){
           moyenne_r=0;
           moyenne_g=0;
           moyenne_b=0;

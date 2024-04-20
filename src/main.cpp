@@ -11,6 +11,7 @@
 #include <cstdlib> // Pour la fonction system() qui permet d'éxécuter des commandes
 
 #include <gtkmm.h>
+
 #include "../include/image_ppm.h"
 
 // On ne peut passer qu'un seul paramètre dans une fonction de callback
@@ -32,8 +33,11 @@ GtkWidget *entryNbUtilisation;
 GtkWidget *checkboxNbUtilisation;
 GtkWidget *entryNbFrameIntacte;
 GtkWidget *checkboxFrameIntacte;
+GtkWidget *entryNbFrameKey;
+GtkWidget *checkboxFrameKey;
 
-GtkWidget* labelPSNR; // Label sous l'image mosaïque qui donne le PSNR
+GtkWidget* labelPSNR;
+GtkWidget* labelSSIM;
 
 GtkWidget *grid;
 
@@ -195,6 +199,12 @@ void makeMosaique(GtkWidget *button, gpointer data) {
         nbFrameIntacte = atoi(g_strdup(gtk_entry_get_text(GTK_ENTRY(entryNbFrameIntacte))));
     }
 
+    bool isCheckedInterpolatedVideo = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(checkboxFrameKey));
+    int nbFrameKey;
+    if (isCheckedInterpolatedVideo){
+        nbFrameKey = atoi(g_strdup(gtk_entry_get_text(GTK_ENTRY(entryNbFrameKey))));
+    } 
+
     // On veut savoir si c'est une image/vidéo couleur ou ndg
     std::string filePath = callbacks[5].directoryPath;
 
@@ -235,8 +245,13 @@ void makeMosaique(GtkWidget *button, gpointer data) {
             sprintf(command1, "make compileVideoCouleur");
             sprintf(command2, "./videoCouleur %s dataVideo/%s.mp4 %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath, nbFrameIntacte);
         }else if(strcmp(acc2,"pgm") == 0){
-            sprintf(command1, "make compileVideoNDG");
-            sprintf(command2, "./videoNdg %s dataVideo/%s.mp4 %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath, nbFrameIntacte);
+            if (isCheckedInterpolatedVideo){
+                sprintf(command1, "make compileInterpolationNDG");
+                sprintf(command2, "./videoNdgInterpolated %s dataVideo/%s.mp4 %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath, nbFrameKey);
+            }else{
+                sprintf(command1, "make compileVideoNDG");
+                sprintf(command2, "./videoNdg %s dataVideo/%s.mp4 %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath, nbFrameIntacte);
+            }
         }else{
             std::cout << "Fichiers non reconnus\n";
             return;
@@ -249,7 +264,9 @@ void makeMosaique(GtkWidget *button, gpointer data) {
         return;
     }
     
-    if (nbImagette != 0 && tailleImagette != 0 && fileNameOut[0] != '\0' && callbacks[5].directoryPath != NULL && callbacks[6].directoryPath != NULL && callbacks[7].directoryPath != NULL && ((!isCheckedNbReutilisation) || (isCheckedNbReutilisation && nbUtilisation != 0)) && ((!isCheckedOptimisationVideo) || (isCheckedOptimisationVideo && nbFrameIntacte > 0)) ){
+    if (nbImagette != 0 && tailleImagette != 0 && fileNameOut[0] != '\0' && callbacks[5].directoryPath != NULL && callbacks[6].directoryPath != NULL && callbacks[7].directoryPath != NULL 
+        && ((!isCheckedNbReutilisation) || (isCheckedNbReutilisation && nbUtilisation != 0)) && ((!isCheckedOptimisationVideo) || (isCheckedOptimisationVideo && nbFrameIntacte > 0)) 
+        && ((!isCheckedInterpolatedVideo) || (isCheckedInterpolatedVideo && nbFrameKey > 0)) ){
         if (isCheckedNbReutilisation){
             int nW, nH;
             if (!isColor){
@@ -270,14 +287,14 @@ void makeMosaique(GtkWidget *button, gpointer data) {
 
         
         char newLabel[300];
-        sprintf(newLabel, "L'image/vidéo mosaïque a été créée dans %s", fileNameOut);
+        sprintf(newLabel, "L'image/vidéo mosaïque a été créée dans le fichier : %s", fileNameOut);
         gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
 
         // Afficher l'image initiale l'image mosaïque (grâce au visionneur d'image) l'image mosaïque
         system(command4); 
         system(command3); 
 
-        if (isImage){ // Attention à ne pas calculer le PSNR pour les vidéos
+        if (isImage){ // Ces mesures sont uniquement pour les images, pas pour les vidéos
 
             // Calcul du PSNR
             OCTET *ImgIn, *ImgOut;
@@ -294,7 +311,7 @@ void makeMosaique(GtkWidget *button, gpointer data) {
                 sprintf(cheminImgOut, "dataImg/%s.ppm",fileNameOut);
             }
 
-
+            // Calcul du PSNR
             double psnr;
             if (isColor){
                 allocation_tableau(ImgIn, OCTET, tailleImg*3);
@@ -314,11 +331,38 @@ void makeMosaique(GtkWidget *button, gpointer data) {
             gtk_label_set_text(GTK_LABEL(labelPSNR),indicationPSNR);
             gtk_grid_attach(GTK_GRID(grid), labelPSNR, 2, 0, 2, 1);
             gtk_widget_show_all(grid);
+
+            // Calcul du score SSIM
+            /*
+            double ssim;
+            if (isColor){
+                cv::Mat img1 = cv::imread(callbacks[5].directoryPath, cv::IMREAD_COLOR);
+                cv::Mat img2 = cv::imread(cheminImgOut, cv::IMREAD_COLOR);
+                cv::cvtColor(img1, img1, cv::COLOR_BGR2RGB);
+                cv::cvtColor(img2, img2, cv::COLOR_BGR2RGB);
+
+                double ssim_r, ssim_g, ssim_b;
+                cv::Scalar score = cv::quality::QualitySSIM::compute(img1, img2);
+                ssim_r = score[0]; 
+                ssim_g = score[1]; 
+                ssim_b = score[2]; 
+                double ssim = (ssim_r + ssim_g + ssim_b) / 3.0;
+            }else{
+                cv::Mat img1 = cv::imread(callbacks[5].directoryPath, cv::IMREAD_GRAYSCALE);
+                cv::Mat img2 = cv::imread(cheminImgOut, cv::IMREAD_GRAYSCALE);
+                ssim = 0.51111111;
+            }
+            char indicationSSIM[300];
+            sprintf(indicationSSIM, "Score SSIM entre l'image initiale et l'image mosaïque = %f", ssim);
+            gtk_label_set_text(GTK_LABEL(labelSSIM),indicationSSIM);
+            gtk_grid_attach(GTK_GRID(grid), labelSSIM, 2, 1, 2, 1);
+            gtk_widget_show_all(grid);
+            */
         }
 
     }else{
         char newLabel[300];
-        sprintf(newLabel, "Impossible de créer la mosaïque, vérifier les informations saisies");
+        sprintf(newLabel, "Impossible de créer l'image/la vidéo mosaïque, vérifier les informations saisies");
         gtk_label_set_text(GTK_LABEL(callbackData->label),newLabel);
     }
 }
@@ -338,7 +382,7 @@ int main(int argc, char **argv){
     gtk_style_context_add_provider_for_screen(gdk_screen_get_default(), GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);
     g_object_unref(provider);
 
-    for (int i = 0 ; i < 9 ; i++){ // Les textes par défaut des labels sont différents (il y en a 3 possible)
+    for (int i = 0 ; i < 10 ; i++){ // Les textes par défaut des labels sont différents (il y en a 3 possible)
         GtkWidget *label;
         if (i==5 || i==6){
             label = gtk_label_new("Aucun fichier choisi");
@@ -453,13 +497,23 @@ int main(int argc, char **argv){
     g_signal_connect(checkboxFrameIntacte, "toggled", G_CALLBACK(on_checkbox_toggled), entryNbFrameIntacte);
     gtk_grid_attach(GTK_GRID(grid), checkboxFrameIntacte, 1, 22, 1, 1);
 
+    entryNbFrameKey = gtk_entry_new();
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entryNbFrameKey), "Nombre de frame entre 2 frames clés");
+    gtk_widget_set_sensitive(GTK_WIDGET(entryNbFrameKey), false); // Désactive initialement l'entry comme la checkbox n'est pas coché
+    gtk_grid_attach(GTK_GRID(grid), entryNbFrameKey, 1, 25, 1, 1);
+    checkboxFrameKey = gtk_check_button_new_with_label("Utiliser l'interpolation");
+    g_signal_connect(checkboxFrameKey, "toggled", G_CALLBACK(on_checkbox_toggled), entryNbFrameKey);
+    gtk_grid_attach(GTK_GRID(grid), checkboxFrameKey, 1, 24, 1, 1);
+
     GtkWidget *button9 = gtk_button_new_with_label("Créer l'image mosaïque");
     gtk_widget_set_name(button9, "bID");
-    gtk_grid_attach(GTK_GRID(grid), button9, 0, 24, 2, 1);
-    gtk_grid_attach(GTK_GRID(grid), labels[8], 0, 25, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), button9, 0, 26, 2, 1);
+    gtk_grid_attach(GTK_GRID(grid), labels[8], 0, 27, 1, 1);
 
     labelPSNR = gtk_label_new("");
     gtk_widget_set_name(labelPSNR, "labelSimple");
+    labelSSIM = gtk_label_new("");
+    gtk_widget_set_name(labelSSIM, "labelSimple");
 
     // Connecter le signal "clicked" des bouton aux callbacks
     g_signal_connect(button1, "clicked", G_CALLBACK(makeSelectDirectory),&(callbacks[0]));

@@ -50,7 +50,8 @@ int main(int argc, char* argv[])
   allocation_tableau(ImgIn, OCTET, nTaille);
   lire_image_pgm(cNomImgLue, ImgIn, nH * nW);
 
-  int nb=nH/taille_imagette;
+  int nb_h=nH/taille_imagette;
+  int nb_w=nW/taille_imagette;
   allocation_tableau(ImgOut, OCTET, nTaille);
 
   string nom[nbImagette];
@@ -80,8 +81,8 @@ int main(int argc, char* argv[])
   fichier.close();
 
   double moyenne;
-  for(int i=0;i<nb;i++){
-    for(int j=0;j<nb;j++){
+  for(int i=0;i<nb_h;i++){
+    for(int j=0;j<nb_w;j++){
       moyenne=0;
       for (int x = 0; x < taille_imagette; x++) {
         for (int y = 0; y < taille_imagette; y++) {

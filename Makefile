@@ -26,8 +26,11 @@ compileVideoCouleur :
 compileVideoNDG : 
 	$(CPP) src/mosaique_video_ndg.cpp -o videoNdg $(LIBS)
 
+compileInterpolationNDG : 
+	$(CPP) src/mosaique_video_ndg_interpolation.cpp -o videoNdgInterpolated $(LIBS)
+
 cleanCompiled :
-	rm -f main videoNdg videoCouleur moyenne moyenneColor carteMoyenne carteMoyenneColor
+	rm -f main videoNdg videoNdgInterpolated videoCouleur moyenne moyenneColor carteMoyenne carteMoyenneColor
 
 cleanImagettes :
 	rm -f bash/*.txt iRedim/*.pgm iRedimColor/*.ppm
