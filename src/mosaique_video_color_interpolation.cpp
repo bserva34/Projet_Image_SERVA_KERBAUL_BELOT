@@ -12,7 +12,9 @@ using namespace std;
 using namespace cv;
 
 std::vector<string> nom;
-std::vector<double> moy;
+std::vector<double> moy_r;
+std::vector<double> moy_g;
+std::vector<double> moy_b;
 
 void lireFichierMoyenne(char* cNomListeMoyenne){
   std::fstream fichier(cNomListeMoyenne, std::ios::in);
@@ -24,14 +26,22 @@ void lireFichierMoyenne(char* cNomListeMoyenne){
   std::string ligne;
   int cpt=0;
   while (std::getline(fichier, ligne)) {
-    size_t positionSlash = ligne.find('/');
+    size_t positionSlash1 = ligne.find('/');
+    size_t positionSlash2 = ligne.find('/', positionSlash1 + 1);
+    size_t positionSlash3 = ligne.find('/', positionSlash2 + 1);
 
-    std::string partieAvantSlash = ligne.substr(0, positionSlash);
-    std::string partieApresSlash = ligne.substr(positionSlash + 1);
-    double val = std::stod(partieApresSlash);
+    string partieAvantSlash = ligne.substr(0, positionSlash1);
+    string partieApresSlash1 = ligne.substr(positionSlash1 + 1, positionSlash2 - positionSlash1 - 1);
+    string partieApresSlash2 = ligne.substr(positionSlash2 + 1, positionSlash3 - positionSlash2 - 1);
+    string partieApresSlash3 = ligne.substr(positionSlash3 + 1);
+    double val_r = std::stod(partieApresSlash1);
+    double val_g = std::stod(partieApresSlash2);
+    double val_b = std::stod(partieApresSlash3);
 
     nom.push_back(partieAvantSlash);
-    moy.push_back(val);
+    moy_r.push_back(val_r);
+    moy_g.push_back(val_g);
+    moy_b.push_back(val_b);
     cpt++;
   }
   fichier.close();
@@ -40,10 +50,11 @@ void lireFichierMoyenne(char* cNomListeMoyenne){
 Mat imgToFrame(OCTET *ImgOut, int frame_width, int frame_height){
   // Ecrire l'image mosaique dans la nouvelle frame
   Mat res;
-  res.create(frame_width, frame_height, CV_8UC1);
+  res.create(frame_width, frame_height, CV_8UC3);
   for (int n = 0 ; n < frame_height ; n++){
     for (int m = 0 ; m < frame_width ; m++){
-      res.at<uchar>(n,m) = (uchar)ImgOut[n*frame_width + m];
+      // Attention : Dans les frames on écrit au format BGR et non RGB
+      res.at<Vec3b>(n,m) = Vec3b((uchar)ImgOut[n*frame_width*3 + m*3+2], (uchar)ImgOut[n*frame_width*3 + m*3+1], (uchar)ImgOut[n*frame_width*3 + m*3+0]);
     }
   }
   return res;
@@ -52,44 +63,58 @@ Mat imgToFrame(OCTET *ImgOut, int frame_width, int frame_height){
 OCTET* frameToImg(Mat frame, int frame_width, int frame_height){
   int tailleFrame = frame_width*frame_height;
   OCTET* res;
-  allocation_tableau(res, OCTET, tailleFrame); // Récupère les pixels de la frame
+  allocation_tableau(res, OCTET, tailleFrame*3); // Récupère les pixels de la frame
 
   // On récupère les pixels de la frame courante que l'on écrit dans ImgIn
   for (int x = 0; x < frame.rows; x++) {
     for (int y = 0; y < frame.cols; y++) {
-        uchar pixelNDG = frame.at<uchar>(x,y);
-        res[x*frame_width + y] = pixelNDG;
+        Vec3b pixel = frame.at<Vec3b>(x,y);
+        // Apparemment c'est au format BGR et non RGB
+        uchar blue = pixel[0];
+        uchar green = pixel[1];
+        uchar red = pixel[2];
+
+        res[x*frame_width*3 + y*3+0] = red ;
+        res[x*frame_width*3 + y*3+1] = green;
+        res[x*frame_width*3 + y*3+2] = blue;
     }
   }
   return res;
 }
 
-OCTET* createNDGMosaique(OCTET* ImgIn, int frame_width, int frame_height, int taille_imagette, char* repertoireImagette, int nbImagette){
+OCTET* createColorMosaique(OCTET* ImgIn, int frame_width, int frame_height, int taille_imagette, char* repertoireImagette, int nbImagette){
   // Création de la mosaïque de la frame courante
 
   OCTET* ImgOut;
-  allocation_tableau(ImgOut, OCTET, frame_width*frame_height); 
+  allocation_tableau(ImgOut, OCTET, frame_width*frame_height*3); 
 
   int nb_w = frame_width/taille_imagette; 
   int nb_h = frame_height/taille_imagette; 
 
-  double moyenne;
+  double moyenne_r, moyenne_g, moyenne_b;
   for(int i=0;i<nb_h;i++){
     for(int j=0;j<nb_w;j++){
-      moyenne=0;
+      moyenne_r=0;
+      moyenne_g=0;
+      moyenne_b=0;
       for (int x = 0; x < taille_imagette; x++) {
         for (int y = 0; y < taille_imagette; y++) {
-          moyenne += ImgIn[(i * taille_imagette * frame_width) + (x * frame_width) + (j * taille_imagette) + y];
+          int pixel_index = (i * taille_imagette * frame_width*3) + (x * frame_width*3) + (j * taille_imagette*3) + y*3;
+          moyenne_r += ImgIn[pixel_index + 0];
+          moyenne_g += ImgIn[pixel_index + 1];
+          moyenne_b += ImgIn[pixel_index + 2];
         }
       }
-      moyenne=moyenne/(taille_imagette*taille_imagette);
+      moyenne_r=moyenne_r/(taille_imagette*taille_imagette);
+      moyenne_g=moyenne_g/(taille_imagette*taille_imagette);
+      moyenne_b=moyenne_b/(taille_imagette*taille_imagette);
 
       int indice=0;
-      char* acc = (char*)nom[0].c_str();;
-      double stock=moy[0];
+      char* acc = (char*)nom[0].c_str();
+      double stock = abs(moyenne_r-moy_r[0])+abs(moyenne_g-moy_g[0])+abs(moyenne_b-moy_b[0]);
       for(int b=1;b<nbImagette;b++){
-        if(abs(moyenne-moy[b]) < abs(moyenne-stock)){
-          stock=moy[b];
+        if(abs(moyenne_r-moy_r[b])+abs(moyenne_g-moy_g[b])+abs(moyenne_b-moy_b[b]) < stock){
+          stock=abs(moyenne_r-moy_r[b])+abs(moyenne_g-moy_g[b])+abs(moyenne_b-moy_b[b]);
           acc=(char*)nom[b].c_str();
           indice=b;
         }       
@@ -101,11 +126,15 @@ OCTET* createNDGMosaique(OCTET* ImgIn, int frame_width, int frame_height, int ta
       strcat(res, acc);
 
       OCTET * Imgacc;
-      allocation_tableau(Imgacc, OCTET,taille_imagette*taille_imagette);
-      lire_image_pgm(res,Imgacc,taille_imagette*taille_imagette);
+      allocation_tableau(Imgacc, OCTET,taille_imagette*taille_imagette*3);
+      lire_image_ppm(res,Imgacc,taille_imagette*taille_imagette);
       for(int z=0;z<taille_imagette;z++){
         for(int k=0;k<taille_imagette;k++){
-          ImgOut[(i * taille_imagette *frame_width) + (z * frame_width) + (j * taille_imagette) + k] = Imgacc[z * taille_imagette + k];
+          int pixel_index_out = i*taille_imagette*frame_width*3 + z*frame_width*3 + j*taille_imagette*3 + k*3;
+          int pixel_index_acc = z*taille_imagette*3 + k*3;
+          ImgOut[pixel_index_out+0] = Imgacc[pixel_index_acc+0];
+          ImgOut[pixel_index_out+1] = Imgacc[pixel_index_acc+1];
+          ImgOut[pixel_index_out+2] = Imgacc[pixel_index_acc+2];
         }        
       }
       free(Imgacc);
@@ -148,7 +177,7 @@ int main(int argc, char* argv[])
 
   lireFichierMoyenne(cNomListeMoyenne);
 
-  VideoWriter videoMosaique(cNomVideoMosaique, VideoWriter::fourcc('X', '2', '6', '4'), fps, Size(frame_width, frame_height), false);
+  VideoWriter videoMosaique(cNomVideoMosaique, VideoWriter::fourcc('X', '2', '6', '4'), fps, Size(frame_width, frame_height), true);
   int nbFrame = 0;
 
   int frame_count = 0;
@@ -160,25 +189,26 @@ int main(int argc, char* argv[])
       if (!cap.read(frame)){
           break; // Toute les frames de la vidéo initiale ont été lu
       }
-      cvtColor(frame, frame, COLOR_BGR2GRAY); // Convertit la frame en niveau de gris, parceque sinon ça ne lit que 1/3 de la vidéo (une seule des 3 composantes)
       if (frame_count%frame_skip==0){
 
         // previousKeyFrame = frame;
 
         OCTET *ImgIn = frameToImg(frame, frame_width, frame_height);
     
-        OCTET* ImgOut = createNDGMosaique(ImgIn, frame_width, frame_height, taille_imagette, repertoireImagette, nbImagette);
+        OCTET* ImgOut = createColorMosaique(ImgIn, frame_width, frame_height, taille_imagette, repertoireImagette, nbImagette);
         
         if (frame_count != 0){
           // On fait l'interpolation entre previousKeyMosaique et ImgOut en frame_skip étapes, on génére donc frame_skip-1 images intermédiaires
           float pasEntreFrame = 1./frame_skip;
           for (int i = 1 ; i < frame_skip ; i++){ // frame_skip-1 images intermédiaires
             OCTET* imgIntermediaire;
-            allocation_tableau(imgIntermediaire, OCTET, tailleFrame);
+            allocation_tableau(imgIntermediaire, OCTET, tailleFrame*3);
             float u = i*pasEntreFrame;
             for (int l = 0 ; l < frame_height ; l++){
               for (int c = 0 ; c < frame_width ; c++){
-                imgIntermediaire[l*frame_width+c] = (1.0-u)*previousKeyMosaique[l*frame_width+c] + u*ImgOut[l*frame_width+c] ;
+                imgIntermediaire[l*frame_width*3+c*3+ 0] = (1.0-u)*previousKeyMosaique[l*frame_width*3+c*3 + 0] + u*ImgOut[l*frame_width*3+c*3 + 0] ;
+                imgIntermediaire[l*frame_width*3+c*3+ 1] = (1.0-u)*previousKeyMosaique[l*frame_width*3+c*3 + 1] + u*ImgOut[l*frame_width*3+c*3 + 1] ;
+                imgIntermediaire[l*frame_width*3+c*3+ 2] = (1.0-u)*previousKeyMosaique[l*frame_width*3+c*3 + 2] + u*ImgOut[l*frame_width*3+c*3 + 2] ;
               }
             }
             Mat frameIntermediaire = imgToFrame(imgIntermediaire, frame_width, frame_height);

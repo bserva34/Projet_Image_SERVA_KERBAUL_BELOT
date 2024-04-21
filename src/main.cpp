@@ -242,8 +242,13 @@ void makeMosaique(GtkWidget *button, gpointer data) {
         char* acc2 = (char*)(ligne.substr(typeImagettes + 1, 3)).c_str(); // 3 premiers caractères suivants ce '.'
 
         if (strcmp(acc2,"ppm") == 0){
-            sprintf(command1, "make compileVideoCouleur");
-            sprintf(command2, "./videoCouleur %s dataVideo/%s.mp4 %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath, nbFrameIntacte);
+            if (isCheckedInterpolatedVideo){
+                sprintf(command1, "make compileInterpolationColor");
+                sprintf(command2, "./videoColorInterpolated %s dataVideo/%s.mp4 %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath, nbFrameKey);
+            }else{
+                sprintf(command1, "make compileVideoCouleur");
+                sprintf(command2, "./videoCouleur %s dataVideo/%s.mp4 %s %d %d %s %d", callbacks[5].directoryPath,fileNameOut,callbacks[6].directoryPath,tailleImagette,nbImagette,callbacks[7].directoryPath, nbFrameIntacte);
+            }
         }else if(strcmp(acc2,"pgm") == 0){
             if (isCheckedInterpolatedVideo){
                 sprintf(command1, "make compileInterpolationNDG");
@@ -266,7 +271,7 @@ void makeMosaique(GtkWidget *button, gpointer data) {
     
     if (nbImagette != 0 && tailleImagette != 0 && fileNameOut[0] != '\0' && callbacks[5].directoryPath != NULL && callbacks[6].directoryPath != NULL && callbacks[7].directoryPath != NULL 
         && ((!isCheckedNbReutilisation) || (isCheckedNbReutilisation && nbUtilisation != 0)) && ((!isCheckedOptimisationVideo) || (isCheckedOptimisationVideo && nbFrameIntacte > 0)) 
-        && ((!isCheckedInterpolatedVideo) || (isCheckedInterpolatedVideo && nbFrameKey > 0)) ){
+        && ((!isCheckedInterpolatedVideo) || (isCheckedInterpolatedVideo && nbFrameKey > 0)) && !(isCheckedOptimisationVideo && isCheckedInterpolatedVideo)){
         if (isCheckedNbReutilisation){
             int nW, nH;
             if (!isColor){
