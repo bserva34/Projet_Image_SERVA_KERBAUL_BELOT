@@ -338,31 +338,6 @@ void makeMosaique(GtkWidget *button, gpointer data) {
             gtk_widget_show_all(grid);
 
             // Calcul du score SSIM
-            /*
-            double ssim;
-            if (isColor){
-                cv::Mat img1 = cv::imread(callbacks[5].directoryPath, cv::IMREAD_COLOR);
-                cv::Mat img2 = cv::imread(cheminImgOut, cv::IMREAD_COLOR);
-                cv::cvtColor(img1, img1, cv::COLOR_BGR2RGB);
-                cv::cvtColor(img2, img2, cv::COLOR_BGR2RGB);
-
-                double ssim_r, ssim_g, ssim_b;
-                cv::Scalar score = cv::quality::QualitySSIM::compute(img1, img2);
-                ssim_r = score[0]; 
-                ssim_g = score[1]; 
-                ssim_b = score[2]; 
-                double ssim = (ssim_r + ssim_g + ssim_b) / 3.0;
-            }else{
-                cv::Mat img1 = cv::imread(callbacks[5].directoryPath, cv::IMREAD_GRAYSCALE);
-                cv::Mat img2 = cv::imread(cheminImgOut, cv::IMREAD_GRAYSCALE);
-                ssim = 0.51111111;
-            }
-            char indicationSSIM[300];
-            sprintf(indicationSSIM, "Score SSIM entre l'image initiale et l'image mosaïque = %f", ssim);
-            gtk_label_set_text(GTK_LABEL(labelSSIM),indicationSSIM);
-            gtk_grid_attach(GTK_GRID(grid), labelSSIM, 2, 1, 2, 1);
-            gtk_widget_show_all(grid);
-            */
         }
 
     }else{
