@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
       // Ecrire l'image mosaique dans la nouvelle frame
       for (int n = 0 ; n < frame_height ; n++){
         for (int m = 0 ; m < frame_width ; m++){
-          frameMosa.at<uchar>(n,m) = (uchar)ImgOut[n*frame_width + m];
+          frameMosa.at<uchar>(m,n) = (uchar)ImgOut[n*frame_width + m];
         }
       }
 

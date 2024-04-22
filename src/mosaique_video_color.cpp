@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 
       // Création de la mosaïque de la frame courante
       Mat frameMosa;
-      frameMosa.create(frame_width, frame_height, CV_8UC3);
+      frameMosa.create(frame_height, frame_width, CV_8UC3);
       double moyenne_r, moyenne_g, moyenne_b;
       for(int i=0;i<nb_h;i++){
         for(int j=0;j<nb_w;j++){
