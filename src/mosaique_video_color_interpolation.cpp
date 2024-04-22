@@ -50,7 +50,7 @@ void lireFichierMoyenne(char* cNomListeMoyenne){
 Mat imgToFrame(OCTET *ImgOut, int frame_width, int frame_height){
   // Ecrire l'image mosaique dans la nouvelle frame
   Mat res;
-  res.create(frame_width, frame_height, CV_8UC3);
+  res.create(frame_height, frame_width, CV_8UC3);
   for (int n = 0 ; n < frame_height ; n++){
     for (int m = 0 ; m < frame_width ; m++){
       // Attention : Dans les frames on écrit au format BGR et non RGB

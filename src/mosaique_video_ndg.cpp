@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 
       // Création de la mosaïque de la frame courante
       Mat frameMosa;
-      frameMosa.create(frame_width, frame_height, CV_8UC1);
+      frameMosa.create(frame_height, frame_width, CV_8UC1);
       double moyenne;
       for(int i=0;i<nb_h;i++){
         for(int j=0;j<nb_w;j++){
@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
       // Ecrire l'image mosaique dans la nouvelle frame
       for (int n = 0 ; n < frame_height ; n++){
         for (int m = 0 ; m < frame_width ; m++){
-          frameMosa.at<uchar>(m,n) = (uchar)ImgOut[n*frame_width + m];
+          frameMosa.at<uchar>(n,m) = (uchar)ImgOut[n*frame_width + m];
         }
       }
 
