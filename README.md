@@ -4,7 +4,7 @@
 Production d'image mosaïque en niveau de gris et en couleur, de même pour les vidéos.  
 
 Pour lancer l'application (dans le répertoire *Interface*) :
-> make
+> make  
 > make run
 
 3 étapes pour créer une mosaïque :  
