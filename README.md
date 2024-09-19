@@ -36,8 +36,7 @@ Une fois terminé, appuyer sur le bouton tout en bas de l'application pour comme
 <br/>
 <br/>
 <h3 align="center">
-Exemple de quelques images mosaïques
-<br/>
+Quelques exemples d'images mosaïques
 <br/> 
 </h3>
 <p align="center">
@@ -51,3 +50,13 @@ Exemple de quelques images mosaïques
 <p align="center">
 	<img src="examples/buffalo.png" width="400"/>
 </p> 
+<br/>
+<br/>
+<h3 align="center">
+Interface développée pour créer nos images/vidéos mosaïques
+<br/> 
+</h3>
+<p align="center">
+	<img src="examples/interface.png" width="400"/>
+</p> 
+
