@@ -31,4 +31,23 @@ Pour cette dernière étape, il faut :
 
 Une fois terminé, appuyer sur le bouton tout en bas de l'application pour commencer la production de la mosaïque :  
 &emsp; Pour une image, le résultat ainsi que l'image initiale s'afficheront à la fin du processus (il est nécesaire d'exécuter l'application sur une machine Linux où *Eye of Gnome* est disponible)  
-&emsp; Pour une vidéo, les frames mosaïques générées seront affichées au fur et à mesure. Une fois le processus terminé, le résultat et la vidéo initiale se lanceront automatiquement (il est nécessaire d'exécuter l'application sur une machine Linux où MPlayer est disponible)  
+&emsp; Pour une vidéo, les frames mosaïques générées seront affichées au fur et à mesure. Une fois le processus terminé, le résultat et la vidéo initiale se lanceront automatiquement (il est nécessaire d'exécuter l'application sur une machine Linux où MPlayer est disponible) 
+
+<br/>
+<br/>
+<h3 align="center">
+Exemple de quelques images mosaïques
+<br/>
+<br/> 
+</h3>
+<p align="center">
+	<img src="examples/multimosa.png" width="700"/>
+</p> 
+<br/>
+<p align="center">
+	<img src="examples/squirrel.png" width="400"/>
+</p> 
+<br/>
+<p align="center">
+	<img src="examples/buffalo.png" width="400"/>
+</p> 
